@@ -60,8 +60,9 @@ export function BankingDashboardComponent() {
   };
 
   return (
-    <Tabs defaultValue="overview" className="space-y-4">
-      <TabsList>
+    <Tabs defaultValue="overview" className="flex space-x-4">
+      {/* Tabs List positioned on the left */}
+      <TabsList className="flex flex-col space-y-2">
         <TabsTrigger value="overview">Overview</TabsTrigger>
         <TabsTrigger value="transactions">Transactions</TabsTrigger>
         <TabsTrigger value="beneficiaries">Beneficiaries</TabsTrigger>
