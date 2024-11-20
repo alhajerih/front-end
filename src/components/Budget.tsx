@@ -51,17 +51,19 @@ export default function Budget() {
 
   return (
     <Card className="flex flex-col">
-      <FoodPrices
-        prices={prices}
-        setPrices={setPrices}
-        dailyCost={dailyCost}
-        setDailyCost={setDailyCost}
-      />
+      <div className="hidden">
+        <FoodPrices
+          prices={prices}
+          setPrices={setPrices}
+          dailyCost={dailyCost}
+          setDailyCost={setDailyCost}
+        />
+      </div>
 
-      <CardHeader className="items-center pb-0">
+      {/* <CardHeader className="items-center pb-0">
         <CardTitle>Budget Savings & Loss</CardTitle>
         <CardDescription>Monthly Overview</CardDescription>
-      </CardHeader>
+      </CardHeader> */}
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={{}} // Fallback to an empty object if undefined
@@ -92,7 +94,7 @@ export default function Budget() {
                         <tspan
                           x={viewBox.cx}
                           y={viewBox.cy}
-                          className="fill-foreground text-3xl font-bold"
+                          className="fill-foreground text-xl font-bold"
                         >
                           {totalSavingsOrLoss > 0
                             ? `+${totalSavingsOrLoss.toLocaleString()}`
