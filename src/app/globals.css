@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&display=swap");
 
 /* Base Tailwind Imports */
 @tailwind base;
@@ -39,12 +39,18 @@ body {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
 
-    --color-food: #4caf50;
-    --color-entertainment: #f44336;
-    --color-transport: #2196f3;
-    --color-subscriptions: #ff9800;
-    --color-other: #9c27b0;
-    --sidebar-background: #1E295F;
+    --color-food: hsl(210, 70%, 40%);
+    --color-other: hsl(210, 65%, 50%);
+    --color-personal: hsl(210, 60%, 60%);
+    --color-eating-out: hsl(210, 55%, 70%);
+    --color-entertainment: hsl(210, 50%, 80%);
+    --color-transport: hsl(210, 45%, 50%);
+    --color-subscriptions: hsl(210, 50%, 65%);
+    --color-fixed: hsl(210, 40%, 30%);
+    --color-one-time: hsl(210, 60%, 50%);
+    --color-other: hsl(210, 70%, 90%);
+
+    --sidebar-background: #1e295f;
     --sidebar-foreground: #ffffff;
     --sidebar-primary: 240 5.9% 10%;
     --sidebar-primary-foreground: 0 0% 98%;

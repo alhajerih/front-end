@@ -34,7 +34,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       </Sidebar>
 
       {/* Main Content */}
-      <div className="flex-1 bg-[url('/Background.png')] p-6 xl-full md:h-full sm:full xs-full">
+      <div className="flex-1 p-6 xl-full md:h-full sm:full xs-full">
         {children}
       </div>
     </div>

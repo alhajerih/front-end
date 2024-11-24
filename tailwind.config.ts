@@ -87,5 +87,21 @@ export default {
         },
       });
     }),
+    plugin(function ({ addUtilities }) {
+      addUtilities({
+        ".gradient-opacity-mask-flipped": {
+          WebkitMaskImage:
+            "linear-gradient(to top right, rgba(0, 0, 0, 0.94) 0%, rgba(0, 0, 0, 0.49) 100%)",
+          WebkitMaskRepeat: "no-repeat",
+          maskImage:
+            "linear-gradient(to top right, rgba(0, 0, 0, 0.94) 0%, rgba(0, 0, 0, 0.39) 100%)",
+          maskRepeat: "no-repeat",
+          zIndex: "-1",
+          position: "absolute",
+          inset: "0",
+          backgroundColor: "#060B28",
+        },
+      });
+    }),
   ],
 } satisfies Config;

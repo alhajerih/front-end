@@ -83,16 +83,17 @@ export default function Budget({ budget }: BudgetProps) {
   };
 
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col items-center">
       <CardContent className="flex-1 pb-0">
-        <PieChart width={400} height={400}>
+        <PieChart width={400} height={250}>
           <Pie
             data={chartData}
             dataKey="amount"
             nameKey="category"
             innerRadius={60}
             outerRadius={100}
-            strokeWidth={5}
+            stroke="none" // No border around slices
+            paddingAngle={5} // Adds spacing between slices
           >
             <Label
               content={({ viewBox }) => {
@@ -107,7 +108,7 @@ export default function Budget({ budget }: BudgetProps) {
                       <tspan
                         x={viewBox.cx}
                         y={viewBox.cy}
-                        className="fill-foreground text-xl font-bold"
+                        className="fill-white text-xl font-bold"
                       >
                         {totalSavingsOrLoss > 0
                           ? `+${totalSavingsOrLoss.toLocaleString()}`
@@ -132,7 +133,7 @@ export default function Budget({ budget }: BudgetProps) {
           />
         </PieChart>
       </CardContent>
-      <CardFooter className="text-center">
+      <CardFooter className="text-center p-0">
         {totalSavingsOrLoss > 0
           ? `Saving ${totalSavingsOrLoss} KWD this month with a budget of ${budget} KWD`
           : `Losing ${Math.abs(
