@@ -114,12 +114,6 @@ export function BankingDashboardComponent() {
 
   return (
     <Tabs defaultValue="overview" className="flex space-x-4">
-      {/* Tabs List positioned on the left */}
-      <TabsList className="flex flex-col space-y-2">
-        <TabsTrigger value="overview">Overview</TabsTrigger>
-        <TabsTrigger value="transactions">Transactions</TabsTrigger>
-        <TabsTrigger value="beneficiaries">Beneficiaries</TabsTrigger>
-      </TabsList>
       <TabsContent value="overview" className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
@@ -300,64 +294,6 @@ export function BankingDashboardComponent() {
               </div>
             </div>
           </CardFooter>
-        </Card>
-      </TabsContent>
-      <TabsContent value="transactions">
-        <Card>
-          <CardHeader>
-            <CardTitle>All Transactions</CardTitle>
-            <CardDescription>A list of all your transactions.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-8">
-              {transactions.map((transaction) => (
-                <div key={transaction.id} className="flex items-center">
-                  <div className="ml-4 space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {transaction.description}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {transaction.date}
-                    </p>
-                  </div>
-                  <div
-                    className={`ml-auto font-medium ${
-                      transaction.amount > 0 ? "text-green-500" : "text-red-500"
-                    }`}
-                  >
-                    {transaction.amount > 0 ? "+" : ""}
-                    {transaction.amount.toFixed(2)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </TabsContent>
-      <TabsContent value="beneficiaries">
-        <Card>
-          <CardHeader>
-            <CardTitle>Beneficiaries</CardTitle>
-            <CardDescription>
-              You have {beneficiaries.length} saved beneficiaries.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {beneficiaries.map((beneficiary) => (
-                <div key={beneficiary.id} className="flex items-center">
-                  <div className="ml-4 space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {beneficiary.name}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {beneficiary.accountNumber}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
         </Card>
       </TabsContent>
     </Tabs>
