@@ -230,8 +230,6 @@ export async function getTransactions(): Promise<Transaction[]> {
 
     const data = await response.json();
 
-    console.log(data);
-
     // Map backend fields to camelCase
     return data.map((item: any) => ({
       id: item.id,

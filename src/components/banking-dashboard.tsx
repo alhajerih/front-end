@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { ArrowDownIcon, ArrowUpIcon, DollarSign, Users } from "lucide-react";
 import { Area, AreaChart, CartesianGrid } from "recharts";
@@ -23,9 +23,59 @@ import {
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Budget from "./Transactions/Budget";
+import { getTransactions, Transaction } from "@/app/api/actions/auth";
 
 export function BankingDashboardComponent() {
-  const [balance, setBalance] = useState(5824.76);
+  const [balance, setBalance] = useState(0);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [chartData, setChartData] = useState<Transaction[]>([]);
+  const [totalSavingsOrLoss, setTotalSavingsOrLoss] = useState(0);
+  const [budget, setBudget] = useState(0);
+
+  useEffect(() => {
+    async function fetchTransactions() {
+      try {
+        const data = await getTransactions();
+
+        // Sort transactions by date
+        const sortedData = data.sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+        );
+
+        // Calculate cumulative balance over time
+        let cumulativeBalance = 0;
+        const balanceOverTime = sortedData.map((transaction) => {
+          cumulativeBalance +=
+            transaction.transactionType === "DEPOSIT"
+              ? transaction.amount
+              : -transaction.amount;
+
+          return {
+            date: transaction.date, // Keep the date for the x-axis
+            balance: cumulativeBalance, // The computed balance at this point
+          };
+        });
+
+        setBalance(cumulativeBalance);
+
+        setBudget(
+          sortedData.reduce((acc, transaction) => {
+            if (transaction.transactionType === "DEPOSIT") {
+              return acc + transaction.amount;
+            } else {
+              return acc;
+            }
+          }, budget) // Initialize with the existing balance
+        );
+
+        setTransactions(sortedData); // Save the sorted transactions
+        setChartData(balanceOverTime); // Save the balance-over-time data
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      }
+    }
+    fetchTransactions();
+  }, []);
 
   const budgetData = [
     { name: "Housing", amount: 1200 },
@@ -33,23 +83,6 @@ export function BankingDashboardComponent() {
     { name: "Transport", amount: 200 },
     { name: "Utilities", amount: 150 },
     { name: "Entertainment", amount: 100 },
-  ];
-
-  const transactions = [
-    {
-      id: 1,
-      description: "Grocery Shopping",
-      amount: -75.5,
-      date: "2023-06-15",
-    },
-    { id: 2, description: "Salary Deposit", amount: 3000, date: "2023-06-01" },
-    { id: 3, description: "Electric Bill", amount: -120, date: "2023-06-10" },
-    {
-      id: 4,
-      description: "Online Purchase",
-      amount: -49.99,
-      date: "2023-06-12",
-    },
   ];
 
   const beneficiaries = [
@@ -67,15 +100,6 @@ export function BankingDashboardComponent() {
       setBalance((prevBalance) => prevBalance - 100);
     }
   };
-
-  const chartData = [
-    { month: "January", desktop: 186 },
-    { month: "February", desktop: 305 },
-    { month: "March", desktop: 237 },
-    { month: "April", desktop: 73 },
-    { month: "May", desktop: 209 },
-    { month: "June", desktop: 214 },
-  ];
 
   const chartConfig = {
     desktop: {
@@ -154,7 +178,7 @@ export function BankingDashboardComponent() {
             </CardHeader>
             <CardContent className="pl-2">
               <ResponsiveContainer width="100%" height={350}>
-                <Budget />
+                <Budget budget={budget} />
               </ResponsiveContainer>
             </CardContent>
           </Card>
@@ -167,28 +191,31 @@ export function BankingDashboardComponent() {
             </CardHeader>
             <CardContent>
               <div className="space-y-8">
-                {transactions.map((transaction) => (
-                  <div key={transaction.id} className="flex items-center">
-                    <div className="ml-4 space-y-1">
-                      <p className="text-sm font-medium leading-none">
-                        {transaction.description}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {transaction.date}
-                      </p>
+                {transactions
+                  .map((transaction) => (
+                    <div key={transaction.id} className="flex items-center">
+                      <div className="ml-4 space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                          {transaction.message}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {transaction.date}
+                        </p>
+                      </div>
+                      <div
+                        className={`ml-auto font-medium ${
+                          transaction.transactionType === "DEPOSIT"
+                            ? "text-green-500"
+                            : "text-red-500"
+                        }`}
+                      >
+                        {transaction.transactionType === "DEPOSIT" ? "+" : "-"}
+                        {transaction.amount.toFixed(2)}
+                      </div>
                     </div>
-                    <div
-                      className={`ml-auto font-medium ${
-                        transaction.amount > 0
-                          ? "text-green-500"
-                          : "text-red-500"
-                      }`}
-                    >
-                      {transaction.amount > 0 ? "+" : ""}
-                      {transaction.amount.toFixed(2)}
-                    </div>
-                  </div>
-                ))}
+                  ))
+                  .reverse()
+                  .slice(0, 5)}
               </div>
             </CardContent>
           </Card>
@@ -200,7 +227,6 @@ export function BankingDashboardComponent() {
           </CardHeader>
           <ChartContainer config={chartConfig}>
             <AreaChart
-              accessibilityLayer
               data={chartData}
               margin={{
                 left: 12,
@@ -209,61 +235,56 @@ export function BankingDashboardComponent() {
             >
               <CartesianGrid vertical={false} />
               <YAxis
-                tickLine={false} // Removes the tick lines for a cleaner look
-                axisLine={false} // Removes the axis line for a modern design
-                tickFormatter={(value) => `$${value}`} // Formats the Y-axis values as currency
-                domain={[0, "dataMax + 50"]} // Optional: Adjusts the Y-axis domain dynamically
-              />
-              <XAxis
-                dataKey="month"
                 tickLine={false}
                 axisLine={false}
-                tickMargin={8}
-                tickFormatter={(value) => value.slice(0, 3)}
+                tickFormatter={(value) => `$${value.toFixed(2)}`}
+                domain={["auto", "auto"]}
               />
-              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+              <XAxis
+                dataKey="date"
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(value) => {
+                  const date = new Date(value);
+                  return `${date.getDate()}/${date.getMonth() + 1}`; // Formats as DD/MM
+                }}
+              />
+              <ChartTooltip
+                cursor={false}
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    const date = new Date(payload[0].payload.date);
+                    return (
+                      <ChartTooltipContent>
+                        <p>
+                          {date.toLocaleDateString()} - Balance: $
+                          {payload[0].payload.balance.toFixed(2)}
+                        </p>
+                      </ChartTooltipContent>
+                    );
+                  }
+                  return null;
+                }}
+              />
               <defs>
-                <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id="balanceFill" x1="0" y1="0" x2="0" y2="1">
                   <stop
                     offset="5%"
-                    stopColor="var(--color-desktop)"
-                    // stopColor=""
+                    stopColor="hsl(223, 54%, 34%)"
                     stopOpacity={0.8}
                   />
                   <stop
                     offset="95%"
-                    stopColor="var(--color-desktop)"
-                    stopOpacity={0.1}
-                  />
-                </linearGradient>
-                <linearGradient id="fillMobile" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor="var(--color-mobile)"
-                    stopOpacity={0.8}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor="var(--color-mobile)"
+                    stopColor="hsl(223, 54%, 34%)"
                     stopOpacity={0.1}
                   />
                 </linearGradient>
               </defs>
               <Area
-                dataKey="mobile"
-                type="natural"
-                fill="url(#fillMobile)"
-                fillOpacity={0.4}
-                stroke="var(--color-mobile)"
-                stackId="a"
-              />
-              <Area
-                dataKey="desktop"
-                type="natural"
-                fill="url(#fillDesktop)"
-                fillOpacity={0.4}
-                stroke="var(--color-desktop)"
-                stackId="a"
+                dataKey="balance"
+                type="monotone"
+                fill="url(#balanceFill)"
+                stroke="hsl(223, 54%, 34%)"
               />
             </AreaChart>
           </ChartContainer>
