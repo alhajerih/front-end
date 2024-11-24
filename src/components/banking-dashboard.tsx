@@ -1,5 +1,6 @@
 "use client";
 
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useEffect, useState } from "react";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { ArrowDownIcon, ArrowUpIcon, DollarSign, Users } from "lucide-react";
@@ -77,28 +78,16 @@ export function BankingDashboardComponent() {
     fetchTransactions();
   }, []);
 
-  const budgetData = [
-    { name: "Housing", amount: 1200 },
-    { name: "Food", amount: 400 },
-    { name: "Transport", amount: 200 },
-    { name: "Utilities", amount: 150 },
-    { name: "Entertainment", amount: 100 },
-  ];
-
   const beneficiaries = [
     { id: 1, name: "John Doe", accountNumber: "**** 1234" },
     { id: 2, name: "Jane Smith", accountNumber: "**** 5678" },
     { id: 3, name: "Alice Johnson", accountNumber: "**** 9012" },
   ];
 
-  const handleDeposit = () => {
-    setBalance((prevBalance) => prevBalance + 100);
-  };
+  const handleDeposit = () => setBalance((prev) => prev + 100);
 
   const handleWithdrawal = () => {
-    if (balance >= 100) {
-      setBalance((prevBalance) => prevBalance - 100);
-    }
+    if (balance >= 100) setBalance((prev) => prev - 100);
   };
 
   const chartConfig = {
@@ -113,35 +102,59 @@ export function BankingDashboardComponent() {
   } satisfies ChartConfig;
 
   return (
-    <Tabs defaultValue="overview" className="flex space-x-4">
+    <Tabs defaultValue="overview" className="flex flex-col m-5 space-y-6">
+      <div className="relative"></div>
+
+      {/* Tabs Content */}
       <TabsContent value="overview" className="space-y-4">
+        {/* scrollable area for the balance and secondary goals */}
+        <ScrollArea className="ml-9 w-11/12 whitespace-nowrap rounded-md ">
+          <div className="flex w-max space-x-4 p-4">
+            {/* Total Balance Card */}
+            <Card className="relative border-0 text-white bg-transparent z-0 w-auto ">
+              <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-gray-300">
+                  Total Balance
+                </CardTitle>
+                <DollarSign className="h-4 w-4 text-gray-300" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl text-white font-bold">
+                  ${balance.toFixed(2)}
+                  <p>/90,000 saved</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
+          {/* Beneficiaries Card */}
+          <Card className="relative border-0 text-white bg-transparent z-0">
+            <div className=" rounded-lg shadow-lg gradient-opacity-mask"></div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Total Balance
-              </CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{balance.toFixed(3)} KWD</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
+              <CardTitle className="text-sm font-medium text-gray-300">
                 Beneficiaries
               </CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <Users className="h-4 w-4 text-gray-300" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{beneficiaries.length}</div>
+              <div className="text-2xl text-white font-bold">
+                {beneficiaries.length}
+              </div>
             </CardContent>
           </Card>
-          <Card>
+
+          {/* Deposit Card */}
+          <Card className="relative border-0 text-white bg-transparent z-0">
+            <div className="rounded-lg shadow-lg gradient-opacity-mask"></div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Deposit</CardTitle>
-              <ArrowDownIcon className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-gray-300">
+                Deposit
+              </CardTitle>
+              <ArrowDownIcon className="h-4 w-4 text-gray-300" />
             </CardHeader>
             <CardContent>
               <Button onClick={handleDeposit} className="w-full">
@@ -149,10 +162,15 @@ export function BankingDashboardComponent() {
               </Button>
             </CardContent>
           </Card>
-          <Card>
+
+          {/* Withdraw Card */}
+          <Card className="relative border-0 text-white bg-transparent z-0">
+            <div className="rounded-lg shadow-lg gradient-opacity-mask"></div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Withdraw</CardTitle>
-              <ArrowUpIcon className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-gray-300">
+                Withdraw
+              </CardTitle>
+              <ArrowUpIcon className="h-4 w-4 text-gray-300" />
             </CardHeader>
             <CardContent>
               <Button
@@ -165,21 +183,29 @@ export function BankingDashboardComponent() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Budget Breakdown and Transactions */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <Card className="col-span-4">
+          <Card className="col-span-4 relative border-0 text-white bg-transparent z-0">
+            <div className="rounded-lg shadow-lg gradient-opacity-mask"></div>
+
             <CardHeader>
-              <CardTitle>Budget Breakdown</CardTitle>
+              <CardTitle className="text-lg font-bold text-white">
+                Budget Breakdown
+              </CardTitle>
             </CardHeader>
             <CardContent className="pl-2">
-              <ResponsiveContainer width="100%" height={350}>
-                <Budget budget={budget} />
-              </ResponsiveContainer>
+              <Budget budget={budget} />
             </CardContent>
           </Card>
-          <Card className="col-span-3">
+          <Card className="col-span-3 relative border-0 text-white bg-transparent z-0">
+            <div className="rounded-lg shadow-lg gradient-opacity-mask"></div>
+
             <CardHeader>
-              <CardTitle>Recent Transactions</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-lg font-bold text-white">
+                Recent Transactions
+              </CardTitle>
+              <CardDescription className="text-sm text-gray-300">
                 You made {transactions.length} transactions this month.
               </CardDescription>
             </CardHeader>
