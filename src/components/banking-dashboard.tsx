@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { ArrowDownIcon, ArrowUpIcon, DollarSign, Users } from "lucide-react";
+import { Area, AreaChart, CartesianGrid } from "recharts";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +12,15 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Budget from "./Budget";
 
@@ -58,6 +67,26 @@ export function BankingDashboardComponent() {
       setBalance((prevBalance) => prevBalance - 100);
     }
   };
+
+  const chartData = [
+    { month: "January", desktop: 186 },
+    { month: "February", desktop: 305 },
+    { month: "March", desktop: 237 },
+    { month: "April", desktop: 73 },
+    { month: "May", desktop: 209 },
+    { month: "June", desktop: 214 },
+  ];
+
+  const chartConfig = {
+    desktop: {
+      label: "Desktop",
+      color: "hsl(223, 54%, 34%)",
+    },
+    mobile: {
+      label: "Mobile",
+      color: "hsl(223, 54%, 34%);",
+    },
+  } satisfies ChartConfig;
 
   return (
     <Tabs defaultValue="overview" className="flex space-x-4">
@@ -125,11 +154,6 @@ export function BankingDashboardComponent() {
             </CardHeader>
             <CardContent className="pl-2">
               <ResponsiveContainer width="100%" height={350}>
-                {/* <BarChart data={budgetData}>
-                  <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
-                  <Bar dataKey="amount" fill="#adfa1d" radius={[4, 4, 0, 0]} />
-                </BarChart> */}
                 <Budget />
               </ResponsiveContainer>
             </CardContent>
@@ -169,6 +193,93 @@ export function BankingDashboardComponent() {
             </CardContent>
           </Card>
         </div>
+        {/* Balance over time */}
+        <Card className="mt-4 p-4">
+          <CardHeader>
+            <CardTitle>Balance over time</CardTitle>
+          </CardHeader>
+          <ChartContainer config={chartConfig}>
+            <AreaChart
+              accessibilityLayer
+              data={chartData}
+              margin={{
+                left: 12,
+                right: 12,
+              }}
+            >
+              <CartesianGrid vertical={false} />
+              <YAxis
+                tickLine={false} // Removes the tick lines for a cleaner look
+                axisLine={false} // Removes the axis line for a modern design
+                tickFormatter={(value) => `$${value}`} // Formats the Y-axis values as currency
+                domain={[0, "dataMax + 50"]} // Optional: Adjusts the Y-axis domain dynamically
+              />
+              <XAxis
+                dataKey="month"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                tickFormatter={(value) => value.slice(0, 3)}
+              />
+              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+              <defs>
+                <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
+                  <stop
+                    offset="5%"
+                    stopColor="var(--color-desktop)"
+                    // stopColor=""
+                    stopOpacity={0.8}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="var(--color-desktop)"
+                    stopOpacity={0.1}
+                  />
+                </linearGradient>
+                <linearGradient id="fillMobile" x1="0" y1="0" x2="0" y2="1">
+                  <stop
+                    offset="5%"
+                    stopColor="var(--color-mobile)"
+                    stopOpacity={0.8}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="var(--color-mobile)"
+                    stopOpacity={0.1}
+                  />
+                </linearGradient>
+              </defs>
+              <Area
+                dataKey="mobile"
+                type="natural"
+                fill="url(#fillMobile)"
+                fillOpacity={0.4}
+                stroke="var(--color-mobile)"
+                stackId="a"
+              />
+              <Area
+                dataKey="desktop"
+                type="natural"
+                fill="url(#fillDesktop)"
+                fillOpacity={0.4}
+                stroke="var(--color-desktop)"
+                stackId="a"
+              />
+            </AreaChart>
+          </ChartContainer>
+          <CardFooter className="mt-4">
+            <div className="flex w-full items-start gap-2 text-sm">
+              <div className="grid gap-2">
+                {/* <div className="flex items-center gap-2 font-medium leading-none">
+                  Trending up by 5.2% this month{" "}
+                </div>
+                <div className="flex items-center gap-2 leading-none text-muted-foreground">
+                  January - June 2024
+                </div> */}
+              </div>
+            </div>
+          </CardFooter>
+        </Card>
       </TabsContent>
       <TabsContent value="transactions">
         <Card>
