@@ -130,7 +130,7 @@ export function BankingDashboardComponent() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${balance.toFixed(2)}</div>
+              <div className="text-2xl font-bold">{balance.toFixed(3)} KWD</div>
             </CardContent>
           </Card>
           <Card>
@@ -210,7 +210,7 @@ export function BankingDashboardComponent() {
                         }`}
                       >
                         {transaction.transactionType === "DEPOSIT" ? "+" : "-"}
-                        {transaction.amount.toFixed(2)}
+                        {transaction.amount.toFixed(3)}
                       </div>
                     </div>
                   ))
@@ -237,7 +237,7 @@ export function BankingDashboardComponent() {
               <YAxis
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(value) => `$${value.toFixed(2)}`}
+                tickFormatter={(value) => `${value.toFixed(0)} KWD`}
                 domain={["auto", "auto"]}
               />
               <XAxis
