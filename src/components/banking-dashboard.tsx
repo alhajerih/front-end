@@ -101,11 +101,12 @@ export function BankingDashboardComponent() {
   } satisfies ChartConfig;
 
   return (
-    <Tabs defaultValue="overview" className="flex flex-col space-y-6">
+    <Tabs defaultValue="overview" className="flex flex-col text-white">
       <div className="relative"></div>
-
       {/* Tabs Content */}
       <TabsContent value="overview" className="space-y-4">
+        <p className="mx-3 text-2xl">Dashboard</p>
+
         {/* scrollable area for the balance and secondary goals */}
         <ScrollArea className="w-11/12 whitespace-nowrap rounded-md ">
           <div className="flex w-max space-x-4">

@@ -17,9 +17,9 @@ import { BadgeDollarSign } from "lucide-react";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex h-full">
+    <div className="flex min-h-screen">
       {/* Sidebar */}
-      <Sidebar>
+      <Sidebar className="h-screen">
         <SidebarItem
           icon={<LayoutDashboard size={20} />}
           text="Dashboard"
@@ -34,7 +34,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       </Sidebar>
 
       {/* Main Content */}
-      <div className="flex-1 p-6 xl-full md:h-full sm:full xs-full">
+      <div className="flex-1 px-6 xl-full md:h-full sm:full xs-full">
         {children}
       </div>
     </div>

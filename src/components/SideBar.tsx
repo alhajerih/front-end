@@ -2,7 +2,7 @@
 import { logout } from "@/app/api/actions/auth";
 import { MoreVertical, ChevronLast, ChevronFirst } from "lucide-react";
 import { useContext, createContext, useState } from "react";
-import { User } from 'lucide-react';
+import { User } from "lucide-react";
 
 interface SidebarContextProps {
   expanded: boolean;
@@ -17,13 +17,18 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
 
   return (
     <aside className="">
-<nav className="h-full relative border-0 text-white bg-transparent z-0 text-white border-r shadow-sm">
-<div className="rounded-lg shadow-lg gradient-opacity-mask"></div>
+      <nav className="h-full relative border-0 text-white bg-transparent z-0 text-white border-r shadow-sm">
+        <div className="rounded-lg shadow-lg gradient-opacity-mask"></div>
 
-<div className="p-4 pb-2 flex justify-between items-center">
-          <h1  className={`overflow-hidden transition-all font-Arimo ${expanded ? "w-35" : "w-0"}`}>TADBEER FINANCIAL         <hr className=" border-WHITE -700" />
+        <div className="p-4 pb-2 flex justify-between items-center">
+          <h1
+            className={`overflow-hidden transition-all font-Arimo ${
+              expanded ? "w-35" : "w-0"
+            }`}
+          >
+            TADBEER FINANCIAL <hr className=" border-WHITE -700" />
           </h1>
-          
+
           <button
             onClick={() => setExpanded((curr) => !curr)}
             className="p-1.5 rounded-lg bg-rgba(3,3,85,1) hover:bg-gray-100"
@@ -32,7 +37,6 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
           </button>
         </div>
         <hr className="my-3 border-gray-700" />
-
 
         <SidebarContext.Provider value={{ expanded }}>
           <ul className="flex-1 px-3">{children}</ul>
