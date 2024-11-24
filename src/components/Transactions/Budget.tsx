@@ -3,11 +3,14 @@ import { PieChart, Pie, Tooltip, Label } from "recharts";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { getTransactions, Transaction } from "@/app/api/actions/auth";
 
-export default function Budget() {
+interface BudgetProps {
+  budget: number; // Define the budget prop type
+}
+
+export default function Budget({ budget }: BudgetProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [chartData, setChartData] = useState<Transaction[]>([]);
   const [totalSavingsOrLoss, setTotalSavingsOrLoss] = useState(0);
-  const [budget, setBudget] = useState(800);
 
   const categoryLabels: Record<string, string> = {
     FOOD_GROCERY: "Food & Groceries",
