@@ -3,11 +3,14 @@ import { PieChart, Pie, Tooltip, Label } from "recharts";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { getTransactions, Transaction } from "@/app/api/actions/auth";
 
-export default function Budget() {
+interface BudgetProps {
+  budget: number; // Define the budget prop type
+}
+
+export default function Budget({ budget }: BudgetProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [chartData, setChartData] = useState<Transaction[]>([]);
   const [totalSavingsOrLoss, setTotalSavingsOrLoss] = useState(0);
-  const [budget, setBudget] = useState(800);
 
   const categoryLabels: Record<string, string> = {
     FOOD_GROCERY: "Food & Groceries",
@@ -80,16 +83,17 @@ export default function Budget() {
   };
 
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col items-center">
       <CardContent className="flex-1 pb-0">
-        <PieChart width={400} height={400}>
+        <PieChart width={400} height={250}>
           <Pie
             data={chartData}
             dataKey="amount"
             nameKey="category"
             innerRadius={60}
             outerRadius={100}
-            strokeWidth={5}
+            stroke="none" // No border around slices
+            paddingAngle={5} // Adds spacing between slices
           >
             <Label
               content={({ viewBox }) => {
@@ -104,7 +108,7 @@ export default function Budget() {
                       <tspan
                         x={viewBox.cx}
                         y={viewBox.cy}
-                        className="fill-foreground text-xl font-bold"
+                        className="fill-white text-xl font-bold"
                       >
                         {totalSavingsOrLoss > 0
                           ? `+${totalSavingsOrLoss.toLocaleString()}`
@@ -129,7 +133,7 @@ export default function Budget() {
           />
         </PieChart>
       </CardContent>
-      <CardFooter className="text-center">
+      <CardFooter className="text-center p-0">
         {totalSavingsOrLoss > 0
           ? `Saving ${totalSavingsOrLoss} KWD this month with a budget of ${budget} KWD`
           : `Losing ${Math.abs(

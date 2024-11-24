@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { useEffect, useState } from "react";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { ArrowDownIcon, ArrowUpIcon, DollarSign, Users } from "lucide-react";
 import { Area, AreaChart, CartesianGrid } from "recharts";
@@ -23,34 +24,58 @@ import {
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Budget from "./Transactions/Budget";
+import { getTransactions, Transaction } from "@/app/api/actions/auth";
 
 export function BankingDashboardComponent() {
-  const [balance, setBalance] = useState(5824.76);
+  const [balance, setBalance] = useState(0);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [chartData, setChartData] = useState<Transaction[]>([]);
+  const [budget, setBudget] = useState(0);
 
-  const budgetData = [
-    { name: "Housing", amount: 1200 },
-    { name: "Food", amount: 400 },
-    { name: "Transport", amount: 200 },
-    { name: "Utilities", amount: 150 },
-    { name: "Entertainment", amount: 100 },
-  ];
+  useEffect(() => {
+    async function fetchTransactions() {
+      try {
+        const data = await getTransactions();
 
-  const transactions = [
-    {
-      id: 1,
-      description: "Grocery Shopping",
-      amount: -75.5,
-      date: "2023-06-15",
-    },
-    { id: 2, description: "Salary Deposit", amount: 3000, date: "2023-06-01" },
-    { id: 3, description: "Electric Bill", amount: -120, date: "2023-06-10" },
-    {
-      id: 4,
-      description: "Online Purchase",
-      amount: -49.99,
-      date: "2023-06-12",
-    },
-  ];
+        // Sort transactions by date
+        const sortedData = data.sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+        );
+
+        // Calculate cumulative balance over time
+        let cumulativeBalance = 0;
+        const balanceOverTime = sortedData.map((transaction) => {
+          cumulativeBalance +=
+            transaction.transactionType === "DEPOSIT"
+              ? transaction.amount
+              : -transaction.amount;
+
+          return {
+            date: transaction.date, // Keep the date for the x-axis
+            balance: cumulativeBalance, // The computed balance at this point
+          };
+        });
+
+        setBalance(cumulativeBalance);
+
+        setBudget(
+          sortedData.reduce((acc, transaction) => {
+            if (transaction.transactionType === "DEPOSIT") {
+              return acc + transaction.amount;
+            } else {
+              return acc;
+            }
+          }, budget) // Initialize with the existing balance
+        );
+
+        setTransactions(sortedData); // Save the sorted transactions
+        setChartData(balanceOverTime); // Save the balance-over-time data
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      }
+    }
+    fetchTransactions();
+  }, []);
 
   const beneficiaries = [
     { id: 1, name: "John Doe", accountNumber: "**** 1234" },
@@ -58,29 +83,16 @@ export function BankingDashboardComponent() {
     { id: 3, name: "Alice Johnson", accountNumber: "**** 9012" },
   ];
 
-  const handleDeposit = () => {
-    setBalance((prevBalance) => prevBalance + 100);
-  };
+  const handleDeposit = () => setBalance((prev) => prev + 100);
 
   const handleWithdrawal = () => {
-    if (balance >= 100) {
-      setBalance((prevBalance) => prevBalance - 100);
-    }
+    if (balance >= 100) setBalance((prev) => prev - 100);
   };
-
-  const chartData = [
-    { month: "January", desktop: 186 },
-    { month: "February", desktop: 305 },
-    { month: "March", desktop: 237 },
-    { month: "April", desktop: 73 },
-    { month: "May", desktop: 209 },
-    { month: "June", desktop: 214 },
-  ];
 
   const chartConfig = {
     desktop: {
       label: "Desktop",
-      color: "hsl(223, 54%, 34%)",
+      color: "hsl(207, 83%, 34%);",
     },
     mobile: {
       label: "Mobile",
@@ -89,255 +101,144 @@ export function BankingDashboardComponent() {
   } satisfies ChartConfig;
 
   return (
-    <Tabs defaultValue="overview" className="flex space-x-4">
-      {/* Tabs List positioned on the left */}
-      <TabsList className="flex flex-col space-y-2">
-        <TabsTrigger value="overview">Overview</TabsTrigger>
-        <TabsTrigger value="transactions">Transactions</TabsTrigger>
-        <TabsTrigger value="beneficiaries">Beneficiaries</TabsTrigger>
-      </TabsList>
+    <Tabs defaultValue="overview" className="flex flex-col space-y-6">
+      <div className="relative"></div>
+
+      {/* Tabs Content */}
       <TabsContent value="overview" className="space-y-4">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Total Balance
-              </CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">${balance.toFixed(2)}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Beneficiaries
-              </CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{beneficiaries.length}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Deposit</CardTitle>
-              <ArrowDownIcon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <Button onClick={handleDeposit} className="w-full">
-                Deposit $100
-              </Button>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Withdraw</CardTitle>
-              <ArrowUpIcon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <Button
-                onClick={handleWithdrawal}
-                className="w-full"
-                variant="outline"
-              >
-                Withdraw $100
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <Card className="col-span-4">
+        {/* scrollable area for the balance and secondary goals */}
+        <ScrollArea className="w-11/12 whitespace-nowrap rounded-md ">
+          <div className="flex w-max space-x-4">
+            {/* Total Balance Card */}
+            <Card className="relative border-0 text-white bg-transparent z-0 w-auto ">
+              <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-gray-300">
+                  Total Balance
+                </CardTitle>
+                <DollarSign className="h-4 w-4 text-gray-300" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl text-white font-bold">
+                  {balance.toFixed(3)} KWD{" "}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2"></div>
+
+        {/* Budget Breakdown and Savings Chart */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+          <Card className="relative border-0 text-white bg-transparent z-0">
+            <div className="rounded-lg shadow-lg gradient-opacity-mask-flipped"></div>
             <CardHeader>
-              <CardTitle>Budget Breakdown</CardTitle>
-            </CardHeader>
-            <CardContent className="pl-2">
-              <ResponsiveContainer width="100%" height={350}>
-                <Budget />
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-          <Card className="col-span-3">
-            <CardHeader>
-              <CardTitle>Recent Transactions</CardTitle>
-              <CardDescription>
-                You made {transactions.length} transactions this month.
-              </CardDescription>
+              <CardTitle className="text-lg font-bold text-white">
+                Budget Breakdown
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-8">
-                {transactions.map((transaction) => (
-                  <div key={transaction.id} className="flex items-center">
-                    <div className="ml-4 space-y-1">
-                      <p className="text-sm font-medium leading-none">
-                        {transaction.description}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {transaction.date}
-                      </p>
-                    </div>
-                    <div
-                      className={`ml-auto font-medium ${
-                        transaction.amount > 0
-                          ? "text-green-500"
-                          : "text-red-500"
-                      }`}
+              <Budget budget={budget} />
+            </CardContent>
+          </Card>
+
+          {/* Savings over time  */}
+          <Card className="relative border-0 text-white bg-transparent z-0">
+            <div className="rounded-lg shadow-lg gradient-opacity-mask-flipped"></div>
+            <CardHeader>
+              <CardTitle className="text-lg font-bold text-white">
+                Savings Chart
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer config={chartConfig}>
+                <AreaChart
+                  data={chartData}
+                  margin={{
+                    left: 12,
+                    right: 12,
+                  }}
+                >
+                  <CartesianGrid vertical={false} />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={true}
+                    tick={({ x, y, payload }) => (
+                      <text
+                        x={x}
+                        y={y}
+                        fill="#FFFFFF"
+                        fontSize="12"
+                        textAnchor="end"
+                        dy={5} // Adjust position if needed
+                      >
+                        {`${payload.value.toFixed(0)} KWD`}{" "}
+                        {/* Format the value */}
+                      </text>
+                    )}
+                    domain={["auto", "auto"]}
+                  />
+
+                  <XAxis
+                    dataKey="date"
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(value) => {
+                      const date = new Date(value);
+                      return `${date.getDate()}/${date.getMonth() + 1}`; // Formats as DD/MM
+                    }}
+                  />
+                  <ChartTooltip
+                    cursor={false}
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const date = new Date(payload[0].payload.date);
+                        return (
+                          <ChartTooltipContent>
+                            <p>
+                              {date.toLocaleDateString()} - Balance: $
+                              {payload[0].payload.balance.toFixed(2)}
+                            </p>
+                          </ChartTooltipContent>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <defs>
+                    <linearGradient
+                      id="balanceFill"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
                     >
-                      {transaction.amount > 0 ? "+" : ""}
-                      {transaction.amount.toFixed(2)}
-                    </div>
-                  </div>
-                ))}
-              </div>
+                      <stop
+                        offset="5%"
+                        stopColor="hsl(200, 100%, 50%)" // Light blue at 5% offset
+                        stopOpacity={0.8} // High opacity for contrast
+                      />
+                      <stop
+                        offset="95%"
+                        stopColor="hsl(200, 100%, 80%)" // Even lighter blue at 95% offset
+                        stopOpacity={0.1} // Low opacity for smooth gradient fade
+                      />
+                    </linearGradient>
+                  </defs>
+                  <Area
+                    dataKey="balance"
+                    type="monotone"
+                    fill="url(#balanceFill)"
+                    stroke="hsl(200, 100%, 70%)" // Strong contrasting light blue
+                    strokeWidth={2} // Optional: Adjust stroke width for visibility
+                  />
+                </AreaChart>
+              </ChartContainer>
             </CardContent>
           </Card>
         </div>
-        {/* Balance over time */}
-        <Card className="mt-4 p-4">
-          <CardHeader>
-            <CardTitle>Balance over time</CardTitle>
-          </CardHeader>
-          <ChartContainer config={chartConfig}>
-            <AreaChart
-              accessibilityLayer
-              data={chartData}
-              margin={{
-                left: 12,
-                right: 12,
-              }}
-            >
-              <CartesianGrid vertical={false} />
-              <YAxis
-                tickLine={false} // Removes the tick lines for a cleaner look
-                axisLine={false} // Removes the axis line for a modern design
-                tickFormatter={(value) => `$${value}`} // Formats the Y-axis values as currency
-                domain={[0, "dataMax + 50"]} // Optional: Adjusts the Y-axis domain dynamically
-              />
-              <XAxis
-                dataKey="month"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                tickFormatter={(value) => value.slice(0, 3)}
-              />
-              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-              <defs>
-                <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor="var(--color-desktop)"
-                    // stopColor=""
-                    stopOpacity={0.8}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor="var(--color-desktop)"
-                    stopOpacity={0.1}
-                  />
-                </linearGradient>
-                <linearGradient id="fillMobile" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor="var(--color-mobile)"
-                    stopOpacity={0.8}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor="var(--color-mobile)"
-                    stopOpacity={0.1}
-                  />
-                </linearGradient>
-              </defs>
-              <Area
-                dataKey="mobile"
-                type="natural"
-                fill="url(#fillMobile)"
-                fillOpacity={0.4}
-                stroke="var(--color-mobile)"
-                stackId="a"
-              />
-              <Area
-                dataKey="desktop"
-                type="natural"
-                fill="url(#fillDesktop)"
-                fillOpacity={0.4}
-                stroke="var(--color-desktop)"
-                stackId="a"
-              />
-            </AreaChart>
-          </ChartContainer>
-          <CardFooter className="mt-4">
-            <div className="flex w-full items-start gap-2 text-sm">
-              <div className="grid gap-2">
-                {/* <div className="flex items-center gap-2 font-medium leading-none">
-                  Trending up by 5.2% this month{" "}
-                </div>
-                <div className="flex items-center gap-2 leading-none text-muted-foreground">
-                  January - June 2024
-                </div> */}
-              </div>
-            </div>
-          </CardFooter>
-        </Card>
-      </TabsContent>
-      <TabsContent value="transactions">
-        <Card>
-          <CardHeader>
-            <CardTitle>All Transactions</CardTitle>
-            <CardDescription>A list of all your transactions.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-8">
-              {transactions.map((transaction) => (
-                <div key={transaction.id} className="flex items-center">
-                  <div className="ml-4 space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {transaction.description}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {transaction.date}
-                    </p>
-                  </div>
-                  <div
-                    className={`ml-auto font-medium ${
-                      transaction.amount > 0 ? "text-green-500" : "text-red-500"
-                    }`}
-                  >
-                    {transaction.amount > 0 ? "+" : ""}
-                    {transaction.amount.toFixed(2)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </TabsContent>
-      <TabsContent value="beneficiaries">
-        <Card>
-          <CardHeader>
-            <CardTitle>Beneficiaries</CardTitle>
-            <CardDescription>
-              You have {beneficiaries.length} saved beneficiaries.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {beneficiaries.map((beneficiary) => (
-                <div key={beneficiary.id} className="flex items-center">
-                  <div className="ml-4 space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {beneficiary.name}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {beneficiary.accountNumber}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
       </TabsContent>
     </Tabs>
   );

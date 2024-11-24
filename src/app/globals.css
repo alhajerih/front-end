@@ -1,9 +1,14 @@
+@import url("https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&display=swap");
+
+/* Base Tailwind Imports */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Arimo", sans-serif; /* Apply Arimo as the global font */
+  font-weight: 400; /* Set default weight to regular */
+  font-optical-sizing: auto;
 }
 
 @layer base {
@@ -34,13 +39,19 @@ body {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
 
-    --color-food: #4caf50;
-    --color-entertainment: #f44336;
-    --color-transport: #2196f3;
-    --color-subscriptions: #ff9800;
-    --color-other: #9c27b0;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --color-food: hsl(210, 70%, 40%);
+    --color-other: hsl(210, 65%, 50%);
+    --color-personal: hsl(210, 60%, 60%);
+    --color-eating-out: hsl(210, 55%, 70%);
+    --color-entertainment: hsl(210, 50%, 80%);
+    --color-transport: hsl(210, 45%, 50%);
+    --color-subscriptions: hsl(210, 50%, 65%);
+    --color-fixed: hsl(210, 40%, 30%);
+    --color-one-time: hsl(210, 60%, 50%);
+    --color-other: hsl(210, 70%, 90%);
+
+    --sidebar-background: #1e295f;
+    --sidebar-foreground: #ffffff;
     --sidebar-primary: 240 5.9% 10%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 240 4.8% 95.9%;
@@ -48,6 +59,7 @@ body {
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -73,14 +85,6 @@ body {
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
 
