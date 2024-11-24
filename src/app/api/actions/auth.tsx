@@ -48,7 +48,7 @@ export interface Transaction {
   amount: number;
   date: string;
   message: string;
-  transactionType: "DEPOSIT" | "WITHDRAWAL";
+  transactionType: "DEPOSIT" | "WITHDRAW";
   transactionCategory:
     | "FOOD_GROCERY"
     | "OTHER_GROCERY"

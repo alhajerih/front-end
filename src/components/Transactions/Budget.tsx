@@ -1,7 +1,5 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
-import { PieChart, Pie, Label } from "recharts";
+import { PieChart, Pie, Tooltip, Label } from "recharts";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { getTransactions, Transaction } from "@/app/api/actions/auth";
 
@@ -40,7 +38,14 @@ export default function Budget() {
   useEffect(() => {
     async function fetchTransactions() {
       try {
-        const data = await getTransactions();
+        let data = await getTransactions();
+
+        // Filter data to only be of transactionType === "WITHDRAW"
+        data = data.filter(
+          (transaction: Transaction) =>
+            transaction.transactionType === "WITHDRAW"
+        );
+
         setTransactions(data);
 
         // Aggregate and transform data for the chart
@@ -119,6 +124,9 @@ export default function Budget() {
               }}
             />
           </Pie>
+          <Tooltip
+            formatter={(value: any, name: string) => [`${value} KWD`, name]}
+          />
         </PieChart>
       </CardContent>
       <CardFooter className="text-center">
