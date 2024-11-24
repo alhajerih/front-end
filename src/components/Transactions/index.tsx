@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -21,29 +21,35 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ChevronDown, ChevronUp, ChevronsUpDown } from "lucide-react";
+import { getTransactions } from "@/app/api/actions/auth";
+import type {
+  Transaction,
+  TransactionType,
+  TransactionCategory,
+} from "@/types/transaction";
 
-type TransactionType = "DEPOSIT" | "WITHDRAWAL";
+// type TransactionType = "DEPOSIT" | "WITHDRAWAL";
 
-type TransactionCategory =
-  | "FOOD_GROCERY"
-  | "OTHER_GROCERY"
-  | "PERSONAL"
-  | "EATING_OUT"
-  | "ENTERTAINMENT"
-  | "TRANSPORTATION"
-  | "SUBSCRIPTION"
-  | "FIXED_EXPENSE"
-  | "ONE_TIME_EXPENSE"
-  | "OTHER";
+// type TransactionCategory =
+//   | "FOOD_GROCERY"
+//   | "OTHER_GROCERY"
+//   | "PERSONAL"
+//   | "EATING_OUT"
+//   | "ENTERTAINMENT"
+//   | "TRANSPORTATION"
+//   | "SUBSCRIPTION"
+//   | "FIXED_EXPENSE"
+//   | "ONE_TIME_EXPENSE"
+//   | "OTHER";
 
-type Transaction = {
-  id: number;
-  amount: number;
-  message: string;
-  date: string;
-  transactionType: TransactionType;
-  transactionCategory: TransactionCategory;
-};
+// type Transaction = {
+//   id: number;
+//   amount: number;
+//   date: string;
+//   message: string;
+//   transactionType: TransactionType;
+//   transactionCategory: TransactionCategory;
+// };
 
 type SortField =
   | "date"
@@ -69,89 +75,10 @@ const categoryColors: Record<TransactionCategory, string> = {
   OTHER: "bg-[#4A5568] text-[#E2E8F0]",
 };
 
-export default function Component() {
-  const [transactions, setTransactions] = useState<Transaction[]>([
-    {
-      id: 1,
-      amount: -89.99,
-      message: "Online Purchase",
-      date: "2023-06-01T10:30:00",
-      transactionType: "WITHDRAWAL",
-      transactionCategory: "PERSONAL",
-    },
-    {
-      id: 2,
-      amount: 3500.0,
-      message: "Salary Deposit",
-      date: "2023-06-02T09:00:00",
-      transactionType: "DEPOSIT",
-      transactionCategory: "OTHER",
-    },
-    {
-      id: 3,
-      amount: -156.78,
-      message: "Grocery Shopping",
-      date: "2023-06-03T14:45:00",
-      transactionType: "WITHDRAWAL",
-      transactionCategory: "FOOD_GROCERY",
-    },
-    {
-      id: 4,
-      amount: -12.99,
-      message: "Subscription Renewal",
-      date: "2023-06-04T00:01:00",
-      transactionType: "WITHDRAWAL",
-      transactionCategory: "SUBSCRIPTION",
-    },
-    {
-      id: 5,
-      amount: 25.0,
-      message: "Refund",
-      date: "2023-06-05T16:20:00",
-      transactionType: "DEPOSIT",
-      transactionCategory: "OTHER",
-    },
-    {
-      id: 6,
-      amount: -75.5,
-      message: "Restaurant Bill",
-      date: "2023-06-06T20:30:00",
-      transactionType: "WITHDRAWAL",
-      transactionCategory: "EATING_OUT",
-    },
-    {
-      id: 7,
-      amount: -45.0,
-      message: "Gas Station",
-      date: "2023-06-07T12:15:00",
-      transactionType: "WITHDRAWAL",
-      transactionCategory: "TRANSPORTATION",
-    },
-    {
-      id: 8,
-      amount: -30.0,
-      message: "Movie Tickets",
-      date: "2023-06-08T19:00:00",
-      transactionType: "WITHDRAWAL",
-      transactionCategory: "ENTERTAINMENT",
-    },
-    {
-      id: 9,
-      amount: 500.0,
-      message: "Freelance Payment",
-      date: "2023-06-09T10:00:00",
-      transactionType: "DEPOSIT",
-      transactionCategory: "OTHER",
-    },
-    {
-      id: 10,
-      amount: -60.0,
-      message: "Phone Bill",
-      date: "2023-06-10T09:30:00",
-      transactionType: "WITHDRAWAL",
-      transactionCategory: "FIXED_EXPENSE",
-    },
-  ]);
+export default function TransactionList() {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
@@ -162,9 +89,25 @@ export default function Component() {
     TransactionCategory | "ALL"
   >("ALL");
 
-  {
-    /*Search bar filter by message */
-  }
+  useEffect(() => {
+    async function fetchTransactions() {
+      try {
+        // Fetch transactions for the user
+        const data = await getTransactions();
+        setTransactions(data);
+        // console.log(data);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching transactions:", err);
+        setError("Failed to load transactions. Please try again later.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchTransactions();
+  }, []);
+
   const filteredTransactions = transactions.filter(
     (transaction) =>
       transaction.message.toLowerCase().includes(filterText.toLowerCase()) &&
@@ -187,9 +130,6 @@ export default function Component() {
 
   const pageCount = Math.ceil(sortedTransactions.length / itemsPerPage);
 
-  {
-    /*icon filter */
-  }
   const handleSort = (field: SortField) => {
     if (field === sortField) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -208,9 +148,6 @@ export default function Component() {
     );
   };
 
-  {
-    /*pages */
-  }
   const renderPaginationButtons = () => {
     const buttons = [];
     const maxButtons = 5;
@@ -237,6 +174,14 @@ export default function Component() {
     return buttons;
   };
 
+  if (isLoading) {
+    return <div className="text-center">Loading transactions...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center text-red-500">{error}</div>;
+  }
+
   return (
     <Card className="w-full max-w-4xl bg-[#1A1D29] text-gray-300 shadow-2xl rounded-3xl">
       <CardHeader>
@@ -248,7 +193,7 @@ export default function Component() {
             placeholder="Filter by message..."
             value={filterText}
             onChange={(e) => setFilterText(e.target.value)}
-            className="max-w-sm "
+            className="max-w-sm"
           />
           <Select
             value={filterCategory}
@@ -259,7 +204,7 @@ export default function Component() {
             <SelectTrigger className="w-[180px] bg-[#2C3141] text-[#A3BFFA]">
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
-            <SelectContent className="">
+            <SelectContent>
               <SelectItem value="ALL">All Categories</SelectItem>
               {Object.keys(categoryColors).map((category) => (
                 <SelectItem key={category} value={category}>
@@ -272,7 +217,6 @@ export default function Component() {
         <Table className="bg-[#1A1D29] text-gray-300 shadow-md rounded-lg">
           <TableHeader>
             <TableRow className="bg-[#23273A] text-[#A3BFFA]">
-              {/* Table Head Buttons */}
               <TableHead>
                 <Button
                   variant="ghost"
@@ -288,7 +232,7 @@ export default function Component() {
                   className="text-[#A3BFFA]"
                   onClick={() => handleSort("message")}
                 >
-                  Message {renderSortIcon("message")}
+                  Description {renderSortIcon("message")}
                 </Button>
               </TableHead>
               <TableHead>
@@ -318,7 +262,6 @@ export default function Component() {
                   Category {renderSortIcon("transactionCategory")}
                 </Button>
               </TableHead>
-              {/* Repeat for other headers */}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -345,7 +288,9 @@ export default function Component() {
                         : "bg-[#2C3141] text-[#FC8181]"
                     }`}
                   >
-                    {transaction.transactionType}
+                    {transaction.transactionType === "DEPOSIT"
+                      ? " CREDIT"
+                      : "DEBIT"}
                   </Badge>
                 </TableCell>
                 <TableCell>

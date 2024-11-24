@@ -1,23 +1,36 @@
 "use client";
+import { logout } from "@/app/api/actions/auth";
 import { MoreVertical, ChevronLast, ChevronFirst } from "lucide-react";
-import { useContext, createContext, useState } from "react";
+import { useContext, createContext, useState, ReactNode } from "react";
 
-const SidebarContext = createContext();
+interface SidebarContextProps {
+  expanded: boolean;
+}
 
-export default function Sidebar({ children }) {
+const SidebarContext = createContext<SidebarContextProps>({ expanded: true });
+
+// const SidebarContext = createContext();
+
+export default function Sidebar({ children }: { children: React.ReactNode }) {
   const [expanded, setExpanded] = useState(true);
 
   return (
     <aside className="h-screen">
       <nav className="h-full flex flex-col bg-gradient-to-b from-[#6773b3] via-[#08111f] to-[#0e46d3] border-r shadow-sm">
         <div className="p-4 pb-2 flex justify-between items-center">
-          <img
-            src="logo"
-            className={`overflow-hidden transition-all ${
-              expanded ? "w-32" : "w-0"
-            }`}
-            alt="logo"
-          />
+          <div className={`${expanded ? "2xl:text-[26px] w-32" : "w-0"}`}>
+            <img
+              src={"logo.svg"}
+              alt="logo"
+              className="w-10 h-10 object-contain"
+            />
+            <h1
+              className={`overflow-hidden transition-all text-[#1c2a41] font-['Times New Roman'] text-2xl font-bold `}
+            >
+              Liwan
+            </h1>
+          </div>
+
           <button
             onClick={() => setExpanded((curr) => !curr)}
             className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100"
@@ -31,11 +44,6 @@ export default function Sidebar({ children }) {
         </SidebarContext.Provider>
 
         <div className="border-t flex p-3">
-          <img
-            src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
-            alt=""
-            className="w-10 h-10 rounded-md"
-          />
           <div
             className={`
               flex justify-between items-center
@@ -43,10 +51,10 @@ export default function Sidebar({ children }) {
           `}
           >
             <div className="leading-4">
-              <h4 className="font-semibold">John Doe</h4>
-              <span className="text-xs text-gray-600">johndoe@gmail.com</span>
+              <button type="button" onClick={logout}>
+                <img src={"power-off.png"} width={20} height={20} />
+              </button>
             </div>
-            <MoreVertical size={20} />
           </div>
         </div>
       </nav>
@@ -54,7 +62,19 @@ export default function Sidebar({ children }) {
   );
 }
 
-export function SidebarItem({ icon, text, active, alert }) {
+interface SidebarItemProps {
+  icon: ReactNode;
+  text: string;
+  active?: boolean;
+  alert?: boolean;
+}
+
+export function SidebarItem({
+  icon,
+  text,
+  active = false,
+  alert = false,
+}: SidebarItemProps) {
   const { expanded } = useContext(SidebarContext);
 
   return (
