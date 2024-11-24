@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/chart";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Budget from "./Budget";
+import Budget from "./Transactions/Budget";
 
 export function BankingDashboardComponent() {
   const [balance, setBalance] = useState(5824.76);
