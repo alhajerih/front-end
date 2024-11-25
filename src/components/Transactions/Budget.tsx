@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { PieChart, Pie, Tooltip, Label } from "recharts";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
@@ -13,6 +13,9 @@ export default function Budget({
   chartData,
   totalSavingsOrLoss,
 }: BudgetProps) {
+  // Get numbeo GET data
+  useEffect(() => {}, []);
+
   return (
     <Card className="flex items-center content-center m-auto">
       <CardContent className="flex-1 pb-0">

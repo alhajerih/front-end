@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
-import Budget from "./Transactions/Budget";
-import { getTransactions, Transaction } from "@/app/api/actions/auth";
 import SavingsChart from "./Transactions/SavingsChart";
 
-import getUsername from "@/app/(auth)/getUsername";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getUser } from "@/lib/token";
+import { useEffect, useState } from "react";
+
+import { getTransactions, Transaction } from "@/app/api/actions/auth";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import Budget from "./Transactions/Budget";
+import SavingsGoals from "./SavingsGoals";
 
 export function BankingDashboardComponent() {
   const [balance, setBalance] = useState(0);
@@ -16,9 +17,11 @@ export function BankingDashboardComponent() {
   const [budgetChartData, setBudgetChartData] = useState([]);
   const [totalSavingsOrLoss, setTotalSavingsOrLoss] = useState(0);
   const [username, setUsername] = useState("");
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
+      setIsClient(true);
       try {
         const username = await getUser();
         setUsername(username.userName);
@@ -124,31 +127,18 @@ export function BankingDashboardComponent() {
     }));
   };
 
+  if (!isClient) {
+    return null; // or a loading indicator
+  }
+
   return (
     <Tabs defaultValue="overview" className="flex flex-col text-white">
       <TabsContent value="overview" className="space-y-4">
         <p className="mx-3 text-2xl">Dashboard</p>
-
         <ScrollArea className="w-11/12 whitespace-nowrap rounded-md ">
           <div className="flex w-max space-x-4">
-            <Card className="relative border-0 text-white bg-transparent z-0 w-auto ">
-              <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0 pt-3">
-                <CardTitle className="text-xs font-medium text-gray-300">
-                  Total Balance
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0 pb-2">
-                <div className="text-xl text-white font-bold">
-                  {Math.floor(balance)}
-                  {/* Integer part */}
-                  <span className="text-gray-400 text-lg">
-                    .{balance.toFixed(3).split(".")[1]} {/* Decimal part */}
-                  </span>{" "}
-                  KWD
-                </div>
-              </CardContent>
-            </Card>
+            {/*  */}
+            <SavingsGoals balance={balance} />
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>

@@ -1,8 +1,8 @@
 "use client";
-import { logout } from "@/app/api/actions/auth";
-import { MoreVertical, ChevronLast, ChevronFirst } from "lucide-react";
-import { useContext, createContext, useState } from "react";
-import { User } from "lucide-react";
+import { ChevronFirst, ChevronLast } from "lucide-react";
+import { createContext, ReactNode, useContext, useState } from "react";
+import ProfileImage from "../../public/IMG-20240929-WA0018.jpg";
+import ProfileDropdown from "./ProfileOpenRight";
 
 interface SidebarContextProps {
   expanded: boolean;
@@ -17,7 +17,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
 
   return (
     <aside className="">
-      <nav className="h-full relative border-0 text-white bg-transparent z-0 text-white border-r shadow-sm rounded-r-3xl overflow-hidden">
+      <nav className="flex flex-col h-full relative border-0 text-white bg-transparent z-0 border-r shadow-sm rounded-r-3xl overflow-hidden">
         <div className="rounded-lg shadow-lg gradient-opacity-mask"></div>
 
         <div className="p-4 pb-2 flex justify-between items-center">
@@ -42,14 +42,21 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
           <ul className="flex-1 px-3">{children}</ul>
         </SidebarContext.Provider>
 
-        <div className="border-t flex p-3">
+        <div className="border-t flex p-3 mt-auto">
+          <div className="">
+            <ProfileDropdown
+              profileImage={ProfileImage}
+              userName="Hamad Alhajeri"
+              userRole="Enginner"
+              userEmail="halhajer@hotmail.com"
+            />
+          </div>
           <div
             className={`flex justify-between items-center overflow-hidden transition-all ${
               expanded ? "w-52 ml-3" : "w-0"
             }`}
           >
             <div className="leading-4">
-              <h4 className="font-semibold">John Doe</h4>
               <span className="text-xs text-gray-300">johndoe@gmail.com</span>
             </div>
           </div>
