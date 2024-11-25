@@ -17,7 +17,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
 
   return (
     <aside className="">
-      <nav className="h-full relative border-0 text-white bg-transparent z-0 text-white border-r shadow-sm">
+      <nav className="h-full relative border-0 text-white bg-transparent z-0 text-white border-r shadow-sm rounded-r-3xl overflow-hidden">
         <div className="rounded-lg shadow-lg gradient-opacity-mask"></div>
 
         <div className="p-4 pb-2 flex justify-between items-center">
