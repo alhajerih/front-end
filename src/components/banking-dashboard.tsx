@@ -1,18 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { DollarSign } from "lucide-react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import Budget from "./Transactions/Budget";
 import { getTransactions, Transaction } from "@/app/api/actions/auth";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "./ui/chart";
 import SavingsChart from "./Transactions/SavingsChart";
+
+import getUsername from "@/app/(auth)/getUsername";
+import { getUser } from "@/lib/token";
 
 export function BankingDashboardComponent() {
   const [balance, setBalance] = useState(0);
@@ -20,10 +15,14 @@ export function BankingDashboardComponent() {
   const [budget, setBudget] = useState(0);
   const [budgetChartData, setBudgetChartData] = useState([]);
   const [totalSavingsOrLoss, setTotalSavingsOrLoss] = useState(0);
+  const [username, setUsername] = useState("");
 
   useEffect(() => {
     async function fetchData() {
       try {
+        const username = await getUser();
+        setUsername(username.userName);
+
         const data = await getTransactions();
 
         // Sort transactions by date
@@ -134,15 +133,19 @@ export function BankingDashboardComponent() {
           <div className="flex w-max space-x-4">
             <Card className="relative border-0 text-white bg-transparent z-0 w-auto ">
               <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-300">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0 pt-3">
+                <CardTitle className="text-xs font-medium text-gray-300">
                   Total Balance
                 </CardTitle>
-                <DollarSign className="h-4 w-4 text-gray-300" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl text-white font-bold">
-                  {balance.toFixed(3)} KWD
+              <CardContent className="pt-0 pb-2">
+                <div className="text-xl text-white font-bold">
+                  {Math.floor(balance)}
+                  {/* Integer part */}
+                  <span className="text-gray-400 text-lg">
+                    .{balance.toFixed(3).split(".")[1]} {/* Decimal part */}
+                  </span>{" "}
+                  KWD
                 </div>
               </CardContent>
             </Card>
@@ -150,7 +153,24 @@ export function BankingDashboardComponent() {
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
 
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-20">
+          <Card className="rounded-3xl overflow-hidden relative border-0 text-white bg-[url('/defaultpfp.png')] bg-cover bg-center z-0 col-span-9 h-64">
+            <div className="rounded-lg shadow-lg gradient-opacity-mask-light w-auto"></div>
+            <p className="text-xs text-gray-400 pt-6 pl-6">Welcome back,</p>
+            <h2 className="capitalize pl-6 text-3xl">{username}</h2>
+            <p className="text-xs text-gray-400 pt-2 pl-6">
+              Glad to see you again!
+            </p>
+          </Card>
+          <Card className="relative border-0 text-white bg-transparent z-0 col-span-4">
+            <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
+          </Card>
+          <Card className="relative border-0 text-white bg-transparent z-0 col-span-7">
+            <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
+          </Card>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-2 ">
           <Card className="relative border-0 text-white bg-transparent z-0 flex flex-col">
             <div className="rounded-lg shadow-lg gradient-opacity-mask-flipped w-auto"></div>
 
@@ -168,10 +188,10 @@ export function BankingDashboardComponent() {
             </CardContent>
           </Card>
           <Card className="relative border-0 text-white bg-transparent z-0">
-            <div className="rounded-lg shadow-lg gradient-opacity-mask-flipped"></div>
+            <div className="rounded-lg gradient-opacity-mask-flipped"></div>
             <CardHeader>
               <CardTitle className="text-lg font-bold text-white">
-                Savings Chart
+                Savings Over Time
               </CardTitle>
             </CardHeader>
             <CardContent>

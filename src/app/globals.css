@@ -5,10 +5,13 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
 body {
   font-family: "Arimo", sans-serif; /* Apply Arimo as the global font */
   font-weight: 400; /* Set default weight to regular */
   font-optical-sizing: auto;
+  overflow-x: hidden;
+  background-color: #1e295f;
 }
 
 @layer base {
