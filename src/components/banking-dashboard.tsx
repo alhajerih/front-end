@@ -18,6 +18,8 @@ export function BankingDashboardComponent() {
   const [totalSavingsOrLoss, setTotalSavingsOrLoss] = useState(0);
   const [username, setUsername] = useState("");
   const [isClient, setIsClient] = useState(false);
+  const [prices, setPrices] = useState(null);
+  const [dailyCost, setDailyCost] = useState(0);
 
   useEffect(() => {
     async function fetchData() {
@@ -68,6 +70,8 @@ export function BankingDashboardComponent() {
         const aggregated = aggregateTransactions(expenseTransactions);
         setBudgetChartData(aggregated);
 
+        console.log(aggregated);
+
         // Calculate total savings or loss
         const totalExpenses = expenseTransactions.reduce(
           (sum, txn) => sum + txn.amount,
@@ -79,8 +83,49 @@ export function BankingDashboardComponent() {
       } catch (error) {
         console.error("Error fetching transactions:", error);
       }
-    }
 
+      try {
+        const res = await fetch("/api/numbeo"); // Call the API endpoint
+        if (!res.ok) throw new Error("Failed to fetch prices");
+        const data = await res.json();
+
+        setPrices(data);
+
+        // Calculate daily cost
+        const quantities = {
+          milkQty: 0.71, // liters/day
+          breadQty: 0.42, // 420g/day
+          riceQty: 0.21, // kg/day
+          cheeseQty: 0.02, // kg/day
+          meatQty: 0.25, // kg/day
+          chickenQty: 0.25, // kg/day
+          eggQty: 0.024, // dozen/day
+          fruitQty: 0.5, // kg/day
+          vegetableQty: 0.42, // kg/day
+        };
+
+        const totalDailyCost =
+          (quantities.milkQty * data.milkPrice +
+            quantities.breadQty * data.breadPrice +
+            quantities.riceQty * data.ricePrice +
+            quantities.cheeseQty * data.cheesePrice +
+            quantities.meatQty * data.meatPrice +
+            quantities.chickenQty * data.chickenPrice +
+            quantities.eggQty * data.eggPrice + // Price per dozen
+            quantities.fruitQty *
+              ((data.applePrice + data.bananaPrice + data.orangePrice) / 3) + // Average fruit price
+            quantities.vegetableQty *
+              ((data.tomatoPrice +
+                data.potatoPrice +
+                data.onionPrice +
+                data.lettucePrice) /
+                4)) *
+          1.5; // Premium constant
+        setDailyCost(totalDailyCost);
+      } catch (error) {
+        console.error("Error fetching prices:", error);
+      }
+    }
     fetchData();
   }, []);
 
@@ -95,6 +140,7 @@ export function BankingDashboardComponent() {
       SUBSCRIPTION: "Subscription",
       FIXED_EXPENSE: "Fixed Expense",
       ONE_TIME_EXPENSE: "One-Time Expense",
+      RENT: "Rent",
       OTHER: "Other",
     };
 
@@ -108,6 +154,7 @@ export function BankingDashboardComponent() {
       Subscription: "var(--color-subscriptions)",
       "Fixed Expense": "var(--color-fixed)",
       "One-Time Expense": "var(--color-one-time)",
+      Rent: "var(--color-other)",
       Other: "var(--color-other)",
     };
 
@@ -161,7 +208,7 @@ export function BankingDashboardComponent() {
         </div>
 
         <div className="grid gap-4 lg:grid-cols-2 ">
-          <Card className="relative border-0 text-white bg-transparent z-0 flex flex-col">
+          <Card className="relative border-0 text-white bg-transparent z-0 flex flex-col z-20">
             <div className="rounded-lg shadow-lg gradient-opacity-mask-flipped w-auto"></div>
 
             <CardHeader className="flex-none">
@@ -170,14 +217,19 @@ export function BankingDashboardComponent() {
               </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-1 items-center justify-center">
-              <Budget
-                budget={budget}
-                chartData={budgetChartData}
-                totalSavingsOrLoss={totalSavingsOrLoss}
-              />
+              {dailyCost === 0 ? (
+                <p>Loading...</p>
+              ) : (
+                <Budget
+                  budget={budget}
+                  chartData={budgetChartData}
+                  totalSavingsOrLoss={totalSavingsOrLoss}
+                  dailyCost={dailyCost}
+                />
+              )}{" "}
             </CardContent>
           </Card>
-          <Card className="relative border-0 text-white bg-transparent z-0">
+          <Card className="relative border-0 text-white bg-transparent -z-0">
             <div className="rounded-lg gradient-opacity-mask-flipped"></div>
             <CardHeader>
               <CardTitle className="text-lg font-bold text-white">

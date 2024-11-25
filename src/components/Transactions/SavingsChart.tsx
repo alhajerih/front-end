@@ -1,18 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { DollarSign } from "lucide-react";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import { getTransactions, Transaction } from "@/app/api/actions/auth";
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 function SavingsChart({ chartData }) {
   const chartConfig = {
