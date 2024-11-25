@@ -9,6 +9,7 @@ import { getTransactions, Transaction } from "@/app/api/actions/auth";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import Budget from "./Transactions/Budget";
 import SavingsGoals from "./SavingsGoals";
+import { FinancialHealth } from "./FinancialHealth";
 
 export function BankingDashboardComponent() {
   const [balance, setBalance] = useState(0);
@@ -20,6 +21,8 @@ export function BankingDashboardComponent() {
   const [isClient, setIsClient] = useState(false);
   const [prices, setPrices] = useState(null);
   const [dailyCost, setDailyCost] = useState(0);
+  const [financialHealthPercentage, setFinancialHealthPercentage] =
+    useState(40);
 
   useEffect(() => {
     async function fetchData() {
@@ -199,10 +202,11 @@ export function BankingDashboardComponent() {
               Glad to see you again!
             </p>
           </Card>
-          <Card className="relative border-0 text-white bg-transparent z-0 col-span-4">
+          <Card className="relative border-0 text-white bg-transparent z-0 col-span-5">
             <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
+            <FinancialHealth percentage={financialHealthPercentage} />
           </Card>
-          <Card className="relative border-0 text-white bg-transparent z-0 col-span-7">
+          <Card className="relative border-0 text-white bg-transparent z-0 col-span-6">
             <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
           </Card>
         </div>
