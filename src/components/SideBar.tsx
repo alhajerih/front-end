@@ -1,8 +1,10 @@
 "use client";
 import { logout } from "@/app/api/actions/auth";
 import { MoreVertical, ChevronLast, ChevronFirst } from "lucide-react";
-import { useContext, createContext, useState } from "react";
-import { User } from 'lucide-react';
+import { useContext, createContext, useState, ReactNode } from "react";
+import { User } from "lucide-react";
+import ProfileDropdown from "./ProfileOpenRight";
+import ProfileImage from "../../public/IMG-20240929-WA0018.jpg";
 
 interface SidebarContextProps {
   expanded: boolean;
@@ -17,13 +19,18 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
 
   return (
     <aside className="">
-<nav className="h-full relative border-0 text-white bg-transparent z-0 text-white border-r shadow-sm">
-<div className="rounded-lg shadow-lg gradient-opacity-mask"></div>
+      <nav className="h-full relative border-0 bg-transparent z-0 text-white border-r shadow-sm">
+        <div className="rounded-lg shadow-lg gradient-opacity-mask"></div>
 
-<div className="p-4 pb-2 flex justify-between items-center">
-          <h1  className={`overflow-hidden transition-all font-Arimo ${expanded ? "w-35" : "w-0"}`}>TADBEER FINANCIAL         <hr className=" border-WHITE -700" />
+        <div className="p-4 pb-2 flex justify-between items-center">
+          <h1
+            className={`overflow-hidden transition-all font-Arimo ${
+              expanded ? "w-35" : "w-0"
+            }`}
+          >
+            TADBEER FINANCIAL <hr className=" border-WHITE -700" />
           </h1>
-          
+
           <button
             onClick={() => setExpanded((curr) => !curr)}
             className="p-1.5 rounded-lg bg-rgba(3,3,85,1) hover:bg-gray-100"
@@ -32,7 +39,6 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
           </button>
         </div>
         <hr className="my-3 border-gray-700" />
-
 
         <SidebarContext.Provider value={{ expanded }}>
           <ul className="flex-1 px-3">{children}</ul>
@@ -45,8 +51,17 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
             }`}
           >
             <div className="leading-4">
-              <h4 className="font-semibold">John Doe</h4>
-              <span className="text-xs text-gray-300">johndoe@gmail.com</span>
+              {/* <h4 className="font-semibold">John Doe</h4>
+              <span className="text-xs text-gray-300">johndoe@gmail.com</span> */}
+              {/* <ProfileDropdown /> */}
+              <div>
+                <ProfileDropdown
+                  profileImage={ProfileImage}
+                  userName="Hamad Alhajeri"
+                  userRole="Enginner"
+                  userEmail="halhajer@hotmail.com"
+                />
+              </div>
             </div>
           </div>
         </div>

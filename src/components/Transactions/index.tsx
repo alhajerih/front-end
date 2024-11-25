@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -59,7 +60,7 @@ type SortField =
   | "transactionCategory";
 
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleString();
+  return new Date(dateString).toLocaleString("en-US");
 };
 
 const categoryColors: Record<TransactionCategory, string> = {

@@ -5,8 +5,9 @@ import { useEffect, useState } from "react";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { ArrowDownIcon, ArrowUpIcon, DollarSign, Users } from "lucide-react";
 import { Area, AreaChart, CartesianGrid } from "recharts";
-
+import ProfileImage from "../../public/defaultpfp.png";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -25,14 +26,17 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Budget from "./Transactions/Budget";
 import { getTransactions, Transaction } from "@/app/api/actions/auth";
+import Link from "next/link";
 
 export function BankingDashboardComponent() {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [chartData, setChartData] = useState<Transaction[]>([]);
   const [budget, setBudget] = useState(0);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
     async function fetchTransactions() {
       try {
         const data = await getTransactions();
@@ -77,18 +81,6 @@ export function BankingDashboardComponent() {
     fetchTransactions();
   }, []);
 
-  const beneficiaries = [
-    { id: 1, name: "John Doe", accountNumber: "**** 1234" },
-    { id: 2, name: "Jane Smith", accountNumber: "**** 5678" },
-    { id: 3, name: "Alice Johnson", accountNumber: "**** 9012" },
-  ];
-
-  const handleDeposit = () => setBalance((prev) => prev + 100);
-
-  const handleWithdrawal = () => {
-    if (balance >= 100) setBalance((prev) => prev - 100);
-  };
-
   const chartConfig = {
     desktop: {
       label: "Desktop",
@@ -99,6 +91,10 @@ export function BankingDashboardComponent() {
       color: "hsl(223, 54%, 34%);",
     },
   } satisfies ChartConfig;
+
+  if (!isClient) {
+    return null; // or a loading indicator
+  }
 
   return (
     <Tabs defaultValue="overview" className="flex flex-col space-y-6">
@@ -127,6 +123,35 @@ export function BankingDashboardComponent() {
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
+
+        {/*Profile card*/}
+        <div className="relative w-full max-w-[700px] h-96 overflow-hidden rounded-3xl">
+          <div className="relative z-10  p-9">
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <p className="text-gray-200">Welcome back,</p>
+                <h1 className="text-3xl font-bold text-white">
+                  Hamad Alhajeri
+                </h1>
+                <p className="text-gray-400">Glad to see you again!</p>
+              </div>
+              {/* <Link
+                href="/profile"
+                className="inline-block text-sm text-blue-200 hover:text-blue-100"
+              >
+                Go to profile
+              </Link> */}
+            </div>
+          </div>
+          <Image
+            src="/defaultpfp.png"
+            alt="background"
+            width={600}
+            height={400}
+            className="absolute inset-0 h-full w-full object-cover"
+            priority
+          />
+        </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2"></div>
 
@@ -172,10 +197,9 @@ export function BankingDashboardComponent() {
                         fill="#FFFFFF"
                         fontSize="12"
                         textAnchor="end"
-                        dy={5} // Adjust position if needed
+                        dy={5}
                       >
-                        {`${payload.value.toFixed(0)} KWD`}{" "}
-                        {/* Format the value */}
+                        {`${payload.value.toFixed(0)} KWD`}
                       </text>
                     )}
                     domain={["auto", "auto"]}
@@ -187,7 +211,7 @@ export function BankingDashboardComponent() {
                     axisLine={false}
                     tickFormatter={(value) => {
                       const date = new Date(value);
-                      return `${date.getDate()}/${date.getMonth() + 1}`; // Formats as DD/MM
+                      return `${date.getDate()}/${date.getMonth() + 1}`;
                     }}
                   />
                   <ChartTooltip
@@ -217,13 +241,13 @@ export function BankingDashboardComponent() {
                     >
                       <stop
                         offset="5%"
-                        stopColor="hsl(200, 100%, 50%)" // Light blue at 5% offset
-                        stopOpacity={0.8} // High opacity for contrast
+                        stopColor="hsl(200, 100%, 50%)"
+                        stopOpacity={0.8}
                       />
                       <stop
                         offset="95%"
-                        stopColor="hsl(200, 100%, 80%)" // Even lighter blue at 95% offset
-                        stopOpacity={0.1} // Low opacity for smooth gradient fade
+                        stopColor="hsl(200, 100%, 80%)"
+                        stopOpacity={0.1}
                       />
                     </linearGradient>
                   </defs>
@@ -231,8 +255,8 @@ export function BankingDashboardComponent() {
                     dataKey="balance"
                     type="monotone"
                     fill="url(#balanceFill)"
-                    stroke="hsl(200, 100%, 70%)" // Strong contrasting light blue
-                    strokeWidth={2} // Optional: Adjust stroke width for visibility
+                    stroke="hsl(200, 100%, 70%)"
+                    strokeWidth={2}
                   />
                 </AreaChart>
               </ChartContainer>
