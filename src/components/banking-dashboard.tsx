@@ -21,8 +21,7 @@ export function BankingDashboardComponent() {
   const [isClient, setIsClient] = useState(false);
   const [prices, setPrices] = useState(null);
   const [dailyCost, setDailyCost] = useState(0);
-  const [financialHealthPercentage, setFinancialHealthPercentage] =
-    useState(40);
+  const [financialHealthPercentage, setFinancialHealthPercentage] = useState(0);
 
   useEffect(() => {
     async function fetchData() {
@@ -66,7 +65,7 @@ export function BankingDashboardComponent() {
 
         // Filter transactions for the budget breakdown
         const expenseTransactions = data.filter(
-          (transaction) => transaction.transactionType === "WITHDRAW"
+          (transaction) => transaction.transactionType === "WITHDRAWAL"
         );
 
         // Aggregate and transform data for the chart
@@ -82,6 +81,18 @@ export function BankingDashboardComponent() {
         );
         setTotalSavingsOrLoss(totalBudget - totalExpenses);
 
+        setFinancialHealthPercentage(
+          Math.min(
+            100,
+            Math.max(
+              0,
+              (cumulativeBalance / totalExpenses) * 130 + // 40% weight: How well balance supports expenses
+                ((totalBudget - totalExpenses) / totalBudget) * 130 // 60% weight: Budget savings rate
+            )
+          )
+        );
+
+        console.log(cumulativeBalance, totalExpenses, totalBudget);
         setChartData(balanceOverTime); // Save the balance-over-time data
       } catch (error) {
         console.error("Error fetching transactions:", error);
@@ -134,8 +145,8 @@ export function BankingDashboardComponent() {
 
   const aggregateTransactions = (transactions: Transaction[]) => {
     const categoryLabels: Record<string, string> = {
-      FOOD_GROCERY: "Food & Groceries",
-      OTHER_GROCERY: "Other Groceries",
+      GROCERY: "Food & Groceries",
+      ESSENTIALS: "Essentials",
       PERSONAL: "Personal",
       EATING_OUT: "Eating Out",
       ENTERTAINMENT: "Entertainment",
@@ -144,12 +155,13 @@ export function BankingDashboardComponent() {
       FIXED_EXPENSE: "Fixed Expense",
       ONE_TIME_EXPENSE: "One-Time Expense",
       RENT: "Rent",
+      UNCATEGORIZED: "Uncategorized",
       OTHER: "Other",
     };
 
     const categoryColors: Record<string, string> = {
       "Food & Groceries": "var(--color-food)",
-      "Other Groceries": "var(--color-other)",
+      Essentials: "var(--color-other)",
       Personal: "var(--color-personal)",
       "Eating Out": "var(--color-eating-out)",
       Entertainment: "var(--color-entertainment)",
@@ -158,6 +170,7 @@ export function BankingDashboardComponent() {
       "Fixed Expense": "var(--color-fixed)",
       "One-Time Expense": "var(--color-one-time)",
       Rent: "var(--color-other)",
+      Uncategorized: "var(--color-other)",
       Other: "var(--color-other)",
     };
 

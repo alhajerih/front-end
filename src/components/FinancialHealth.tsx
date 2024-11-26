@@ -10,15 +10,15 @@ interface FinancialHealthProps {
 export function FinancialHealth({ percentage }: FinancialHealthProps) {
   // Determine the emoji based on percentage
   const getEmoji = (value: number) => {
-    if (value >= 80) return <SmileIcon className="h-8 w-8" />;
-    if (value >= 60) return <MehIcon className="h-8 w-8" />;
+    if (value >= 60) return <SmileIcon className="h-8 w-8" />;
+    if (value >= 30) return <MehIcon className="h-8 w-8" />;
     return <FrownIcon className="h-8 w-8" />;
   };
 
   // Determine the color gradient based on percentage
   const getColor = (value: number) => {
-    if (value >= 80) return "from-blue-600 to-blue-400"; // Blue
-    if (value >= 60) return "from-yellow-500 to-yellow-300"; // Yellow
+    if (value >= 60) return "from-blue-600 to-blue-400"; // Blue
+    if (value >= 30) return "from-yellow-500 to-yellow-300"; // Yellow
     return "from-red-600 to-red-400"; // Red
   };
 
@@ -26,14 +26,20 @@ export function FinancialHealth({ percentage }: FinancialHealthProps) {
   const rotation = (percentage / 100) * 180;
 
   return (
-    <Card className="relative border-0 text-white bg-transparent z-0">
+    <Card className="relative border-0 text-white bg-transparent z-10">
       <CardHeader className="pb-0">
         <CardTitle className="text-lg font-semibold pb-0">
           Financial Health
         </CardTitle>
-        <p className="text-xs text-zinc-400 -mt-1">
-          Calculated based off your FHS (Financial Health Score)
-        </p>
+        <div className="relative group inline-block">
+          <p className="text-xs text-zinc-400 -mt-1">
+            Calculated based off your FHS (Financial Health Score)
+          </p>
+          <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max rounded-md bg-gray-800 text-white text-xs px-2 py-1 opacity-0 transition-opacity group-hover:opacity-100">
+            Financial Health Score is calculated based on savings, expenses, and
+            budget.
+          </div>
+        </div>
       </CardHeader>
 
       <CardContent className="flex flex-col items-center pt-2 pb-0">
@@ -59,7 +65,7 @@ export function FinancialHealth({ percentage }: FinancialHealthProps) {
             {getEmoji(percentage)}
           </div>
         </div>
-        <div className="mt-8 text-3xl font-bold">{percentage}%</div>
+        <div className="mt-8 text-3xl font-bold">{percentage.toFixed(1)}%</div>
         <div className="absolute bottom-0 p-6 pb-16 w-full flex justify-between text-sm text-zinc-400 mt-2 ">
           <span>0%</span>
           <span>100%</span>
