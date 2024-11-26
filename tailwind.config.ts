@@ -8,8 +8,15 @@ export default {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  safelist: [
+    "bg-[url('/defaultpfp.png')]", // Safelist the custom background image class
+  ],
   theme: {
     extend: {
+      gridTemplateColumns: {
+        // Define a 20-column grid
+        20: "repeat(20, minmax(0, 1fr))",
+      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
@@ -95,6 +102,22 @@ export default {
           WebkitMaskRepeat: "no-repeat",
           maskImage:
             "linear-gradient(to top right, rgba(0, 0, 0, 0.94) 0%, rgba(0, 0, 0, 0.39) 100%)",
+          maskRepeat: "no-repeat",
+          zIndex: "-1",
+          position: "absolute",
+          inset: "0",
+          backgroundColor: "#060B28",
+        },
+      });
+    }),
+    plugin(function ({ addUtilities }) {
+      addUtilities({
+        ".gradient-opacity-mask-light": {
+          WebkitMaskImage:
+            "linear-gradient(to right, rgba(0, 0, 0, 0.64) 0%, rgba(0, 0, 0, 0.00) 100%)",
+          WebkitMaskRepeat: "no-repeat",
+          maskImage:
+            "linear-gradient(to right, rgba(0, 0, 0, 0.64) 0%, rgba(0, 0, 0, 0.00) 100%)",
           maskRepeat: "no-repeat",
           zIndex: "-1",
           position: "absolute",

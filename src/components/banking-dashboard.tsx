@@ -1,44 +1,36 @@
-"use client";
-
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { useEffect, useState } from "react";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
-import { ArrowDownIcon, ArrowUpIcon, DollarSign, Users } from "lucide-react";
-import { Area, AreaChart, CartesianGrid } from "recharts";
-import ProfileImage from "../../public/defaultpfp.png";
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "@/components/ui/card";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+import SavingsChart from "./Transactions/SavingsChart";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Budget from "./Transactions/Budget";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getUser } from "@/lib/token";
+import { useEffect, useState } from "react";
+
 import { getTransactions, Transaction } from "@/app/api/actions/auth";
-import Link from "next/link";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import Budget from "./Transactions/Budget";
+import SavingsGoals from "./SavingsGoals";
+import { FinancialHealth } from "./FinancialHealth";
 
 export function BankingDashboardComponent() {
   const [balance, setBalance] = useState(0);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [chartData, setChartData] = useState<Transaction[]>([]);
   const [budget, setBudget] = useState(0);
+  const [budgetChartData, setBudgetChartData] = useState([]);
+  const [totalSavingsOrLoss, setTotalSavingsOrLoss] = useState(0);
+  const [username, setUsername] = useState("");
   const [isClient, setIsClient] = useState(false);
+  const [prices, setPrices] = useState(null);
+  const [dailyCost, setDailyCost] = useState(0);
+  const [financialHealthPercentage, setFinancialHealthPercentage] =
+    useState(40);
 
   useEffect(() => {
-    setIsClient(true);
-    async function fetchTransactions() {
+    async function fetchData() {
+      setIsClient(true);
       try {
+        const username = await getUser();
+        setUsername(username.userName);
+
         const data = await getTransactions();
 
         // Sort transactions by date
@@ -62,204 +54,198 @@ export function BankingDashboardComponent() {
 
         setBalance(cumulativeBalance);
 
-        setBudget(
-          sortedData.reduce((acc, transaction) => {
-            if (transaction.transactionType === "DEPOSIT") {
-              return acc + transaction.amount;
-            } else {
-              return acc;
-            }
-          }, budget) // Initialize with the existing balance
+        // Calculate budget (total DEPOSIT transactions)
+        const totalBudget = sortedData.reduce((acc, transaction) => {
+          if (transaction.transactionType === "DEPOSIT") {
+            return acc + transaction.amount;
+          }
+          return acc;
+        }, 0);
+
+        setBudget(totalBudget);
+
+        // Filter transactions for the budget breakdown
+        const expenseTransactions = data.filter(
+          (transaction) => transaction.transactionType === "WITHDRAW"
         );
 
-        setTransactions(sortedData); // Save the sorted transactions
+        // Aggregate and transform data for the chart
+        const aggregated = aggregateTransactions(expenseTransactions);
+        setBudgetChartData(aggregated);
+
+        console.log(aggregated);
+
+        // Calculate total savings or loss
+        const totalExpenses = expenseTransactions.reduce(
+          (sum, txn) => sum + txn.amount,
+          0
+        );
+        setTotalSavingsOrLoss(totalBudget - totalExpenses);
+
         setChartData(balanceOverTime); // Save the balance-over-time data
       } catch (error) {
         console.error("Error fetching transactions:", error);
       }
+
+      try {
+        const res = await fetch("/api/numbeo"); // Call the API endpoint
+        if (!res.ok) throw new Error("Failed to fetch prices");
+        const data = await res.json();
+
+        setPrices(data);
+
+        // Calculate daily cost
+        const quantities = {
+          milkQty: 0.71, // liters/day
+          breadQty: 0.42, // 420g/day
+          riceQty: 0.21, // kg/day
+          cheeseQty: 0.02, // kg/day
+          meatQty: 0.25, // kg/day
+          chickenQty: 0.25, // kg/day
+          eggQty: 0.024, // dozen/day
+          fruitQty: 0.5, // kg/day
+          vegetableQty: 0.42, // kg/day
+        };
+
+        const totalDailyCost =
+          (quantities.milkQty * data.milkPrice +
+            quantities.breadQty * data.breadPrice +
+            quantities.riceQty * data.ricePrice +
+            quantities.cheeseQty * data.cheesePrice +
+            quantities.meatQty * data.meatPrice +
+            quantities.chickenQty * data.chickenPrice +
+            quantities.eggQty * data.eggPrice + // Price per dozen
+            quantities.fruitQty *
+              ((data.applePrice + data.bananaPrice + data.orangePrice) / 3) + // Average fruit price
+            quantities.vegetableQty *
+              ((data.tomatoPrice +
+                data.potatoPrice +
+                data.onionPrice +
+                data.lettucePrice) /
+                4)) *
+          1.5; // Premium constant
+        setDailyCost(totalDailyCost);
+      } catch (error) {
+        console.error("Error fetching prices:", error);
+      }
     }
-    fetchTransactions();
+    fetchData();
   }, []);
 
-  const chartConfig = {
-    desktop: {
-      label: "Desktop",
-      color: "hsl(207, 83%, 34%);",
-    },
-    mobile: {
-      label: "Mobile",
-      color: "hsl(223, 54%, 34%);",
-    },
-  } satisfies ChartConfig;
+  const aggregateTransactions = (transactions: Transaction[]) => {
+    const categoryLabels: Record<string, string> = {
+      FOOD_GROCERY: "Food & Groceries",
+      OTHER_GROCERY: "Other Groceries",
+      PERSONAL: "Personal",
+      EATING_OUT: "Eating Out",
+      ENTERTAINMENT: "Entertainment",
+      TRANSPORTATION: "Transportation",
+      SUBSCRIPTION: "Subscription",
+      FIXED_EXPENSE: "Fixed Expense",
+      ONE_TIME_EXPENSE: "One-Time Expense",
+      RENT: "Rent",
+      OTHER: "Other",
+    };
+
+    const categoryColors: Record<string, string> = {
+      "Food & Groceries": "var(--color-food)",
+      "Other Groceries": "var(--color-other)",
+      Personal: "var(--color-personal)",
+      "Eating Out": "var(--color-eating-out)",
+      Entertainment: "var(--color-entertainment)",
+      Transportation: "var(--color-transport)",
+      Subscription: "var(--color-subscriptions)",
+      "Fixed Expense": "var(--color-fixed)",
+      "One-Time Expense": "var(--color-one-time)",
+      Rent: "var(--color-other)",
+      Other: "var(--color-other)",
+    };
+
+    const aggregated = transactions.reduce((acc, transaction) => {
+      const label = categoryLabels[transaction.transactionCategory] || "Other";
+      if (!acc[label]) {
+        acc[label] = 0;
+      }
+      acc[label] += transaction.amount;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return Object.entries(aggregated).map(([category, amount]) => ({
+      category,
+      amount,
+      fill: categoryColors[category] || "gray",
+    }));
+  };
 
   if (!isClient) {
     return null; // or a loading indicator
   }
 
   return (
-    <Tabs defaultValue="overview" className="flex flex-col space-y-6">
-      <div className="relative"></div>
-
-      {/* Tabs Content */}
+    <Tabs defaultValue="overview" className="flex flex-col text-white">
       <TabsContent value="overview" className="space-y-4">
-        {/* scrollable area for the balance and secondary goals */}
+        <p className="mx-3 text-2xl">Dashboard</p>
         <ScrollArea className="w-11/12 whitespace-nowrap rounded-md ">
           <div className="flex w-max space-x-4">
-            {/* Total Balance Card */}
-            <Card className="relative border-0 text-white bg-transparent z-0 w-auto ">
-              <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-300">
-                  Total Balance
-                </CardTitle>
-                <DollarSign className="h-4 w-4 text-gray-300" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl text-white font-bold">
-                  {balance.toFixed(3)} KWD{" "}
-                </div>
-              </CardContent>
-            </Card>
+            {/*  */}
+            <SavingsGoals balance={balance} />
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
 
-        {/*Profile card*/}
-        <div className="relative w-full max-w-[700px] h-96 overflow-hidden rounded-3xl">
-          <div className="relative z-10  p-9">
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <p className="text-gray-200">Welcome back,</p>
-                <h1 className="text-3xl font-bold text-white">
-                  Hamad Alhajeri
-                </h1>
-                <p className="text-gray-400">Glad to see you again!</p>
-              </div>
-              {/* <Link
-                href="/profile"
-                className="inline-block text-sm text-blue-200 hover:text-blue-100"
-              >
-                Go to profile
-              </Link> */}
-            </div>
-          </div>
-          <Image
-            src="/defaultpfp.png"
-            alt="background"
-            width={600}
-            height={400}
-            className="absolute inset-0 h-full w-full object-cover"
-            priority
-          />
+        <div className="grid gap-4 lg:grid-cols-20">
+          <Card className="rounded-3xl overflow-hidden relative border-0 text-white bg-[url('/defaultpfp.png')] bg-cover bg-center z-0 col-span-9 h-64">
+            <div className="rounded-lg shadow-lg gradient-opacity-mask-light w-auto"></div>
+            <p className="text-xs text-gray-400 pt-6 pl-6">Welcome back,</p>
+            <h2 className="capitalize pl-6 text-3xl">{username}</h2>
+            <p className="text-xs text-gray-400 pt-2 pl-6">
+              Glad to see you again!
+            </p>
+          </Card>
+          <Card className="relative border-0 text-white bg-transparent z-0 col-span-5">
+            <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
+            <FinancialHealth percentage={financialHealthPercentage} />
+          </Card>
+          <Card className="relative border-0 text-white bg-transparent z-0 col-span-6">
+            <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
+          </Card>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2"></div>
+        <div className="grid gap-4 lg:grid-cols-2 ">
+          <Card className="relative border-0 text-white bg-transparent z-0 flex flex-col z-20">
+            <div className="rounded-lg shadow-lg gradient-opacity-mask-flipped w-auto"></div>
 
-        {/* Budget Breakdown and Savings Chart */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-          <Card className="relative border-0 text-white bg-transparent z-0">
-            <div className="rounded-lg shadow-lg gradient-opacity-mask-flipped"></div>
-            <CardHeader>
+            <CardHeader className="flex-none">
               <CardTitle className="text-lg font-bold text-white">
                 Budget Breakdown
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <Budget budget={budget} />
+            <CardContent className="flex flex-1 items-center justify-center">
+              {dailyCost === 0 ? (
+                <p>Loading...</p>
+              ) : (
+                <Budget
+                  budget={budget}
+                  chartData={budgetChartData}
+                  totalSavingsOrLoss={totalSavingsOrLoss}
+                  dailyCost={dailyCost}
+                />
+              )}{" "}
             </CardContent>
           </Card>
-
-          {/* Savings over time  */}
-          <Card className="relative border-0 text-white bg-transparent z-0">
-            <div className="rounded-lg shadow-lg gradient-opacity-mask-flipped"></div>
+          <Card className="relative border-0 text-white bg-transparent -z-0">
+            <div className="rounded-lg gradient-opacity-mask-flipped"></div>
             <CardHeader>
               <CardTitle className="text-lg font-bold text-white">
-                Savings Chart
+                Savings Over Time
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ChartContainer config={chartConfig}>
-                <AreaChart
-                  data={chartData}
-                  margin={{
-                    left: 12,
-                    right: 12,
-                  }}
-                >
-                  <CartesianGrid vertical={false} />
-                  <YAxis
-                    tickLine={false}
-                    axisLine={true}
-                    tick={({ x, y, payload }) => (
-                      <text
-                        x={x}
-                        y={y}
-                        fill="#FFFFFF"
-                        fontSize="12"
-                        textAnchor="end"
-                        dy={5}
-                      >
-                        {`${payload.value.toFixed(0)} KWD`}
-                      </text>
-                    )}
-                    domain={["auto", "auto"]}
-                  />
-
-                  <XAxis
-                    dataKey="date"
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(value) => {
-                      const date = new Date(value);
-                      return `${date.getDate()}/${date.getMonth() + 1}`;
-                    }}
-                  />
-                  <ChartTooltip
-                    cursor={false}
-                    content={({ active, payload }) => {
-                      if (active && payload && payload.length) {
-                        const date = new Date(payload[0].payload.date);
-                        return (
-                          <ChartTooltipContent>
-                            <p>
-                              {date.toLocaleDateString()} - Balance: $
-                              {payload[0].payload.balance.toFixed(2)}
-                            </p>
-                          </ChartTooltipContent>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-                  <defs>
-                    <linearGradient
-                      id="balanceFill"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop
-                        offset="5%"
-                        stopColor="hsl(200, 100%, 50%)"
-                        stopOpacity={0.8}
-                      />
-                      <stop
-                        offset="95%"
-                        stopColor="hsl(200, 100%, 80%)"
-                        stopOpacity={0.1}
-                      />
-                    </linearGradient>
-                  </defs>
-                  <Area
-                    dataKey="balance"
-                    type="monotone"
-                    fill="url(#balanceFill)"
-                    stroke="hsl(200, 100%, 70%)"
-                    strokeWidth={2}
-                  />
-                </AreaChart>
-              </ChartContainer>
+              {!chartData ? (
+                <p>Loading...</p>
+              ) : (
+                <SavingsChart chartData={chartData} />
+              )}
             </CardContent>
           </Card>
         </div>

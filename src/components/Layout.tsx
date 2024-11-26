@@ -1,27 +1,15 @@
 import Sidebar, { SidebarItem } from "@/components/SideBar";
-import {
-  BarChart,
-  Boxes,
-  LayoutDashboard,
-  Package,
-  Receipt,
-  Settings,
-  UserCircle,
-} from "lucide-react";
-import Image from "next/image";
+import { LayoutDashboard, Settings } from "lucide-react";
 // icon imports
-import { User } from "lucide-react";
-import { LogOut } from "lucide-react";
-import { Phone } from "lucide-react";
-import { BadgeDollarSign } from "lucide-react";
-import Link from "next/link";
 import { logout } from "@/app/api/actions/auth";
+import { BadgeDollarSign, LogOut, Phone, User } from "lucide-react";
+import Link from "next/link";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex h-full">
+    <div className="flex min-h-screen">
       {/* Sidebar */}
-      <Sidebar>
+      <Sidebar className="h-screen">
         <Link href="/">
           <SidebarItem icon={<LayoutDashboard size={20} />} text="Dashboard" />
         </Link>
@@ -44,7 +32,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       </Sidebar>
 
       {/* Main Content */}
-      <div className="flex-1 p-6 xl-full md:h-full sm:full xs-full">
+      <div className="flex-1 px-6 xl-full md:h-full sm:full xs-full">
         {children}
       </div>
     </div>
