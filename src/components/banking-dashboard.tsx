@@ -7,18 +7,15 @@ import { useEffect, useState } from "react";
 
 import { getTransactions, Transaction } from "@/app/api/actions/auth";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import Budget from "./BudgetingCard/Budget";
-import SavingsGoals from "./SavingsRow/SavingsGoals";
-import { FinancialHealth } from "./FirstRow/FinancialHealthCard/FinancialHealth";
-import { FavoriteGoalCard } from "./FirstRow/FavoriteGoalCard/FavoriteGoalCard";
-import BeneficiaryDialog from "./BudgetingCard/BeneficiaryComponent";
-import BeneficiaryList from "./BudgetingCard/BeneficiaryList";
 import BeneficiaryBreakdownCard from "./BudgetingCard/BeneficiaryBreakdownCard";
+import BeneficiaryDialog from "./BudgetingCard/BeneficiaryComponent";
+import Budget from "./BudgetingCard/Budget";
+import { FinancialHealth } from "./FirstRow/FinancialHealthCard/FinancialHealth";
+import SavingsGoals from "./SavingsRow/SavingsGoals";
 
 import { motion } from "framer-motion";
-import GreetingCard from "./FirstRow/GreetingCard/GreetingCard";
 import FavoriteGoalCardWrapper from "./FirstRow/FavoriteGoalCard/FavoriteGoalCardWrapper";
-import BudgetingCard from "./SecondRow/BudgetingCard";
+import GreetingCard from "./FirstRow/GreetingCard/GreetingCard";
 
 const containerVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -96,99 +93,6 @@ export function BankingDashboardComponent() {
       fill: categoryColors[category] || "gray",
     }));
   };
-
-  return (
-    <>
-      {totalSavingsOrLoss ? (
-        <div className="">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-          >
-            <Tabs defaultValue="overview" className="flex flex-col text-white">
-              <TabsContent value="overview" className="space-y-4">
-                {/* Balance and savings cards */}
-                <ScrollArea className="w-11/12 whitespace-nowrap rounded-md ">
-                  <div className="flex w-max space-x-4 mt-4">
-                    <SavingsGoals
-                      balance={balance}
-                      setFavoriteGoal={setFavoriteGoal}
-                    />
-                  </div>
-                  <ScrollBar orientation="horizontal" />
-                </ScrollArea>
-
-                {/* First row */}
-                <div className="grid gap-4 lg:grid-cols-20">
-                  {/* Greeting card */}
-
-                  <GreetingCard username={username} />
-
-                  {/* Financial Health Card */}
-                  <Card className="relative border-0 text-white bg-transparent z-0 col-span-5">
-                    <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
-                    <FinancialHealth percentage={financialHealthPercentage} />
-                  </Card>
-
-                  {/* Favorite Goal Card */}
-                  <FavoriteGoalCardWrapper favoriteGoal={favoriteGoal} />
-                </div>
-
-                {/* Second row */}
-                <div className="grid gap-4 lg:grid-cols-2 ">
-                  {/* Budgeting Card */}
-                  <Card className="relative border-0 text-white bg-transparent z-0 flex flex-col z-20">
-                    <div className="rounded-lg shadow-lg gradient-opacity-mask-flipped w-auto"></div>
-
-                    <CardHeader className="flex-none">
-                      <CardTitle className="text-lg font-bold text-white flex">
-                        Budget Breakdown
-                        <BeneficiaryBreakdownCard />
-                        <BeneficiaryDialog />
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex flex-1 items-center justify-center">
-                      {dailyCost === 0 ? (
-                        <p>Loading...</p>
-                      ) : (
-                        <Budget
-                          budget={budget}
-                          chartData={budgetChartData}
-                          totalSavingsOrLoss={totalSavingsOrLoss}
-                          dailyCost={dailyCost}
-                        />
-                      )}{" "}
-                    </CardContent>
-                  </Card>
-                  {/* Savings over time graph Card */}
-                  <Card className="relative border-0 text-white bg-transparent -z-0">
-                    <div className="rounded-lg gradient-opacity-mask-flipped"></div>
-                    <CardHeader>
-                      <CardTitle className="text-lg font-bold text-white">
-                        Savings Over Time
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {!chartData ? (
-                        <p>Loading...</p>
-                      ) : (
-                        <SavingsChart chartData={chartData} />
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </motion.div>
-        </div>
-      ) : (
-        <div className="flex items-center justify-center m-auto mt-52">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-      )}
-    </>
-  );
 
   async function fetchData() {
     setIsClient(true);
@@ -306,4 +210,97 @@ export function BankingDashboardComponent() {
       console.error("Error fetching prices:", error);
     }
   }
+
+  return (
+    <>
+      {totalSavingsOrLoss ? (
+        <div className="">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+          >
+            <Tabs defaultValue="overview" className="flex flex-col text-white">
+              <TabsContent value="overview" className="space-y-4">
+                {/* Balance and savings cards */}
+                <ScrollArea className="w-11/12 whitespace-nowrap rounded-md ">
+                  <div className="flex w-max space-x-4 mt-4">
+                    <SavingsGoals
+                      balance={balance}
+                      setFavoriteGoal={setFavoriteGoal}
+                    />
+                  </div>
+                  <ScrollBar orientation="horizontal" />
+                </ScrollArea>
+
+                {/* First row */}
+                <div className="grid gap-4 lg:grid-cols-20">
+                  {/* Greeting card */}
+
+                  <GreetingCard username={username} />
+
+                  {/* Financial Health Card */}
+                  <Card className="relative border-0 text-white bg-transparent z-0 col-span-5">
+                    <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
+                    <FinancialHealth percentage={financialHealthPercentage} />
+                  </Card>
+
+                  {/* Favorite Goal Card */}
+                  <FavoriteGoalCardWrapper favoriteGoal={favoriteGoal} />
+                </div>
+
+                {/* Second row */}
+                <div className="grid gap-4 lg:grid-cols-2 ">
+                  {/* Budgeting Card */}
+                  <Card className="relative border-0 text-white bg-transparent z-0 flex flex-col z-20">
+                    <div className="rounded-lg shadow-lg gradient-opacity-mask-flipped w-auto"></div>
+
+                    <CardHeader className="flex-none">
+                      <CardTitle className="text-lg font-bold text-white flex">
+                        Budget Breakdown
+                        <BeneficiaryBreakdownCard />
+                        <BeneficiaryDialog />
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-1 items-center justify-center">
+                      {dailyCost === 0 ? (
+                        <p>Loading...</p>
+                      ) : (
+                        <Budget
+                          budget={budget}
+                          chartData={budgetChartData}
+                          totalSavingsOrLoss={totalSavingsOrLoss}
+                          dailyCost={dailyCost}
+                        />
+                      )}{" "}
+                    </CardContent>
+                  </Card>
+                  {/* Savings over time graph Card */}
+                  <Card className="relative border-0 text-white bg-transparent -z-0">
+                    <div className="rounded-lg gradient-opacity-mask-flipped"></div>
+                    <CardHeader>
+                      <CardTitle className="text-lg font-bold text-white">
+                        Savings Over Time
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {!chartData ? (
+                        <p>Loading...</p>
+                      ) : (
+                        <SavingsChart chartData={chartData} />
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </motion.div>
+        </div>
+      ) : (
+        <div className="flex items-center justify-center m-auto mt-52">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      )}
+    </>
+  );
 }

@@ -307,25 +307,31 @@ export async function getTransactions(): Promise<Transaction[]> {
   }
 }
 
-// export async function addTransaction(
-//   data: Omit<Transaction, "id">
-// ): Promise<Transaction> {
-//   try {
-//     const response = await fetch(`${baseUrl}/api/v1/transactions`, {
-//       method: "POST",
-//       headers: await getHeaders(),
-//       body: JSON.stringify(data),
-//     });
+export async function getAiRecommendation(
+  budget,
+  chartData,
+  totalSavingsOrLoss,
+  dailyCost
+) {
+  const response = await fetch("http://localhost:8081/api/v1/user/chat", {
+    method: "POST",
+    headers: await getHeaders(),
+    body: JSON.stringify({
+      prompt: `You are an AI chatbot for a financial budgeting website. Your task is to provide personalized financial recommendations based on the user's budget and spending data. The following data is provided:
+      - Total Budget: $${budget}
+      - Chart Data (breakdown of expenses): ${JSON.stringify(chartData)}
+      - Total Savings or Loss: $${totalSavingsOrLoss}
+      - Average daily cost of food per person within the area: $${dailyCost}.
+      
+      Analyze this data and suggest actionable recommendations to help the user save money and manage their budget effectively. Ensure the recommendations are practical, personalized, concise, brief, and easy to implement.`,
+    }),
+  });
 
-//     if (!response.ok) {
-//       const error = await response.json();
-//       throw new Error(error.message || "Failed to add transaction");
-//     }
+  if (!response.ok) {
+    console.error("Failed to send data:", response);
+    return;
+  }
 
-//     revalidatePath("/transactions");
-//     return await response.json();
-//   } catch (error) {
-//     console.error("Error adding transaction:", error);
-//     throw error;
-//   }
-// }
+  let result = await response.json();
+  return result;
+}

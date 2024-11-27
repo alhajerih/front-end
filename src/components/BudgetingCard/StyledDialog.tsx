@@ -1,6 +1,5 @@
 "use client";
 
-import { marked } from "marked";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,10 +9,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { marked } from "marked";
+import { useCallback, useEffect, useRef, useState } from "react";
 
+import { getAiRecommendation } from "@/app/api/actions/auth";
 import { SparklesIcon } from "@heroicons/react/24/solid";
-import { getHeaders } from "@/app/api/actions/config";
 
 interface BudgetProps {
   budget: number;
@@ -53,27 +53,12 @@ export function StyledDialog({
     }
 
     try {
-      // setRecommendations(["Loading personalized recommendations..."]);
-      const response = await fetch("http://localhost:8081/api/v1/user/chat", {
-        method: "POST",
-        headers: await getHeaders(),
-        body: JSON.stringify({
-          prompt: `You are an AI chatbot for a financial budgeting website. Your task is to provide personalized financial recommendations based on the user's budget and spending data. The following data is provided:
-          - Total Budget: $${budget}
-          - Chart Data (breakdown of expenses): ${JSON.stringify(chartData)}
-          - Total Savings or Loss: $${totalSavingsOrLoss}
-          - Average daily cost of food per person within the area: $${dailyCost}.
-          
-          Analyze this data and suggest actionable recommendations to help the user save money and manage their budget effectively. Ensure the recommendations are practical, personalized, concise, brief, and easy to implement.`,
-        }),
-      });
-
-      if (!response.ok) {
-        console.error("Failed to send data:", response);
-        return;
-      }
-
-      let result = await response.json();
+      let result = await getAiRecommendation(
+        budget,
+        chartData,
+        totalSavingsOrLoss,
+        dailyCost
+      );
 
       console.log(result.choices[0].message.content);
       result = result.choices[0].message.content;
@@ -86,12 +71,6 @@ export function StyledDialog({
     } catch (error) {
       console.error("Error sending data:", error);
     }
-  };
-
-  // Function to safely parse and render Markdown as HTML
-  const renderMarkdown = (markdown: string) => {
-    const html = marked(markdown);
-    return { __html: html }; // Return the HTML safely for React
   };
 
   const typeText = useCallback(() => {
