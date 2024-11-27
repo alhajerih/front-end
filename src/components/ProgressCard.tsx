@@ -123,7 +123,7 @@ export function ProgressCard({
             style={{ width: `${progress}%` }}
           ></div>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex space-x-2 justify-between">
           {/* Custom Progress Bar */}
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -175,7 +175,7 @@ export function ProgressCard({
           <Button
             variant="outline"
             size="sm"
-            className={`border-zinc-800 bg-zinc-900 hover:bg-yellow-500 text-white ${
+            className={`border-zinc-800 bg-zinc-900 hover:bg-yellow-500 text-white ml-auto ${
               isFavorite ? "bg-yellow-500" : ""
             }`}
             onClick={onSetFavorite} // Trigger favorite action

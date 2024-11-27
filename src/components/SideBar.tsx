@@ -26,7 +26,7 @@ interface User {
   token: string;
 }
 export default function Sidebar({ children }: { children: React.ReactNode }) {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -63,7 +63,8 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
           <ul className="flex-1 px-3">{children}</ul>
         </SidebarContext.Provider>
 
-        <div className="border-t flex p-3 mt-auto">
+        <div className="flex p-3 fixed bottom-0">
+          {" "}
           <div className="">
             {user ? (
               <ProfileDropdown
