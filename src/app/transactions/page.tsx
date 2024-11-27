@@ -1,5 +1,5 @@
 import Layout from "@/components/Layout";
-import LeftSidebar from "@/components/SideBar";
+import LeftSidebar from "@/components/Sidebar/SideBar";
 import Transactions from "@/components/Transactions";
 import { getUser } from "@/lib/token";
 import React from "react";

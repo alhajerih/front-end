@@ -1,6 +1,6 @@
 "use client";
 
-import { TeamMember } from "@/components/TeamMember";
+import { TeamMember } from "@/components/ContactPage/TeamMember";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 // React

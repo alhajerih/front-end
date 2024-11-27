@@ -1,4 +1,4 @@
-import Sidebar, { SidebarItem } from "@/components/SideBar";
+import Sidebar, { SidebarItem } from "@/components/Sidebar/SideBar";
 import { LayoutDashboard, Settings } from "lucide-react";
 // icon imports
 import { logout } from "@/app/api/actions/auth";

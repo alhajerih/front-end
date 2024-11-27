@@ -8,14 +8,17 @@ import { useEffect, useState } from "react";
 import { getTransactions, Transaction } from "@/app/api/actions/auth";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import Budget from "./BudgetingCard/Budget";
-import SavingsGoals from "./SavingsGoals";
-import { FinancialHealth } from "./FinancialHealth";
-import { FavoriteGoalCard } from "./FavoriteGoalCard";
+import SavingsGoals from "./SavingsRow/SavingsGoals";
+import { FinancialHealth } from "./FirstRow/FinancialHealthCard/FinancialHealth";
+import { FavoriteGoalCard } from "./FirstRow/FavoriteGoalCard/FavoriteGoalCard";
 import BeneficiaryDialog from "./BudgetingCard/BeneficiaryComponent";
 import BeneficiaryList from "./BudgetingCard/BeneficiaryList";
 import BeneficiaryBreakdownCard from "./BudgetingCard/BeneficiaryBreakdownCard";
 
 import { motion } from "framer-motion";
+import GreetingCard from "./FirstRow/GreetingCard/GreetingCard";
+import FavoriteGoalCardWrapper from "./FirstRow/FavoriteGoalCard/FavoriteGoalCardWrapper";
+import BudgetingCard from "./SecondRow/BudgetingCard";
 
 const containerVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -35,7 +38,7 @@ export function BankingDashboardComponent() {
   const [chartData, setChartData] = useState<Transaction[]>([]);
   const [budget, setBudget] = useState(0);
   const [budgetChartData, setBudgetChartData] = useState([]);
-  const [totalSavingsOrLoss, setTotalSavingsOrLoss] = useState(0);
+  const [totalSavingsOrLoss, setTotalSavingsOrLoss] = useState(null);
   const [username, setUsername] = useState("");
   const [isClient, setIsClient] = useState(false);
   const [prices, setPrices] = useState(null);
@@ -94,13 +97,9 @@ export function BankingDashboardComponent() {
     }));
   };
 
-  if (!isClient) {
-    return null; // or a loading indicator
-  }
-
   return (
     <>
-      {chartData !== [] ? (
+      {totalSavingsOrLoss ? (
         <div className="">
           <motion.div
             initial="hidden"
@@ -124,42 +123,21 @@ export function BankingDashboardComponent() {
                 <div className="grid gap-4 lg:grid-cols-20">
                   {/* Greeting card */}
 
-                  <Card className="rounded-3xl overflow-hidden relative border-0 text-white bg-[url('/defaultpfp.png')] bg-cover bg-center z-0 col-span-9 h-64">
-                    <div className="rounded-lg shadow-lg gradient-opacity-mask-light w-auto"></div>
-                    <p className="text-xs text-gray-400 pt-6 pl-6">
-                      Welcome back,
-                    </p>
-                    <h2 className="capitalize pl-6 text-3xl">{username}</h2>
-                    <p className="text-xs text-gray-400 pt-2 pl-6">
-                      Glad to see you again!
-                    </p>
-                  </Card>
+                  <GreetingCard username={username} />
+
+                  {/* Financial Health Card */}
                   <Card className="relative border-0 text-white bg-transparent z-0 col-span-5">
                     <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
                     <FinancialHealth percentage={financialHealthPercentage} />
                   </Card>
-                  <Card className="relative border-0 text-white bg-transparent z-0 col-span-6">
-                    <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
-                    {favoriteGoal ? (
-                      <FavoriteGoalCard
-                        goal={favoriteGoal.amount}
-                        key={favoriteGoal.id}
-                        label={favoriteGoal.name}
-                        currentAmount={favoriteGoal.currentAmount}
-                        amountAllocatedPerMonth={
-                          favoriteGoal.amountAllocatedPerMonth
-                        }
-                        monthsUntilDeadline={favoriteGoal.monthsUntilDeadline}
-                      />
-                    ) : (
-                      <p className="text-xs text-gray-400 pt-6 pl-6">
-                        No favorite goal set.
-                      </p>
-                    )}
-                  </Card>
+
+                  {/* Favorite Goal Card */}
+                  <FavoriteGoalCardWrapper favoriteGoal={favoriteGoal} />
                 </div>
 
+                {/* Second row */}
                 <div className="grid gap-4 lg:grid-cols-2 ">
+                  {/* Budgeting Card */}
                   <Card className="relative border-0 text-white bg-transparent z-0 flex flex-col z-20">
                     <div className="rounded-lg shadow-lg gradient-opacity-mask-flipped w-auto"></div>
 
@@ -183,6 +161,7 @@ export function BankingDashboardComponent() {
                       )}{" "}
                     </CardContent>
                   </Card>
+                  {/* Savings over time graph Card */}
                   <Card className="relative border-0 text-white bg-transparent -z-0">
                     <div className="rounded-lg gradient-opacity-mask-flipped"></div>
                     <CardHeader>

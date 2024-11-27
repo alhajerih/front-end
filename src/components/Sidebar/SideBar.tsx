@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 import ProfileImage from "../../public/IMG-20240929-WA0018.jpg";
-import ProfileDropdown from "./ProfileOpenRight";
+import ProfileDropdown from "@/components/Sidebar/ProfileOpenRight";
 import { getProfile } from "@/app/api/actions/auth";
 
 interface SidebarContextProps {
@@ -47,7 +47,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
               expanded ? "w-35" : "w-0"
             }`}
           >
-            TADBEER FINANCIAL <hr className=" border-WHITE -700" />
+            TADBEER FINANCIAL <hr />
           </h1>
 
           <button
