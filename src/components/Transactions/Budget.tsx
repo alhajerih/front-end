@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { PieChart, Pie, Tooltip, Label } from "recharts";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import { Button } from "@mui/material";
+import { StyledDialog } from "./StyledDialog";
 
 interface BudgetProps {
   budget: number;
@@ -15,6 +25,10 @@ export default function Budget({
   totalSavingsOrLoss,
   dailyCost,
 }: BudgetProps) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  console.log(budget, chartData, totalSavingsOrLoss, dailyCost);
+
   // Calculation for tips
   // Calculate the threshold for "Eating Out"
   const eatingOutThreshold = dailyCost * 31;
@@ -49,9 +63,9 @@ export default function Budget({
   const fixedExpenseThreshold = budget * 0.2;
 
   return (
-    <Card className="flex items-center content-center m-auto">
-      <CardContent className="flex-1 pb-0">
-        <PieChart width={300} height={200}>
+    <Card className="flex items-center content-center m-auto min-w-0 m-0">
+      <CardContent className="flex-1 p-0">
+        <PieChart width={250} height={200}>
           <Pie
             data={chartData}
             dataKey="amount"
@@ -99,7 +113,7 @@ export default function Budget({
           />
         </PieChart>
       </CardContent>
-      <div className="text-center p-0 flex flex-col ">
+      <div className="text-center p-0 flex flex-col min-w-0">
         {/* Eating out tip */}
         {isOverspendingEatingOut && (
           <div className="mt-4 text-warning text-sm">
@@ -171,6 +185,12 @@ export default function Budget({
             </span>
           </div>
         )}
+        <StyledDialog
+          budget={budget}
+          chartData={chartData}
+          totalSavingsOrLoss={totalSavingsOrLoss}
+          dailyCost={dailyCost}
+        />
       </div>
     </Card>
   );

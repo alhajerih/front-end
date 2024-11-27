@@ -10,6 +10,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import Budget from "./Transactions/Budget";
 import SavingsGoals from "./SavingsGoals";
 import { FinancialHealth } from "./FinancialHealth";
+import { FavoriteGoalCard } from "./FavoriteGoalCard";
 
 export function BankingDashboardComponent() {
   const [balance, setBalance] = useState(0);
@@ -21,8 +22,8 @@ export function BankingDashboardComponent() {
   const [isClient, setIsClient] = useState(false);
   const [prices, setPrices] = useState(null);
   const [dailyCost, setDailyCost] = useState(0);
-  const [financialHealthPercentage, setFinancialHealthPercentage] =
-    useState(40);
+  const [financialHealthPercentage, setFinancialHealthPercentage] = useState(0);
+  const [favoriteGoal, setFavoriteGoal] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -66,7 +67,7 @@ export function BankingDashboardComponent() {
 
         // Filter transactions for the budget breakdown
         const expenseTransactions = data.filter(
-          (transaction) => transaction.transactionType === "WITHDRAW"
+          (transaction) => transaction.transactionType === "WITHDRAWAL"
         );
 
         // Aggregate and transform data for the chart
@@ -82,6 +83,18 @@ export function BankingDashboardComponent() {
         );
         setTotalSavingsOrLoss(totalBudget - totalExpenses);
 
+        setFinancialHealthPercentage(
+          Math.min(
+            100,
+            Math.max(
+              0,
+              (cumulativeBalance / totalExpenses) * 130 + // 40% weight: How well balance supports expenses
+                ((totalBudget - totalExpenses) / totalBudget) * 130 // 60% weight: Budget savings rate
+            )
+          )
+        );
+
+        console.log(cumulativeBalance, totalExpenses, totalBudget);
         setChartData(balanceOverTime); // Save the balance-over-time data
       } catch (error) {
         console.error("Error fetching transactions:", error);
@@ -134,8 +147,8 @@ export function BankingDashboardComponent() {
 
   const aggregateTransactions = (transactions: Transaction[]) => {
     const categoryLabels: Record<string, string> = {
-      FOOD_GROCERY: "Food & Groceries",
-      OTHER_GROCERY: "Other Groceries",
+      GROCERY: "Food & Groceries",
+      ESSENTIALS: "Essentials",
       PERSONAL: "Personal",
       EATING_OUT: "Eating Out",
       ENTERTAINMENT: "Entertainment",
@@ -144,12 +157,13 @@ export function BankingDashboardComponent() {
       FIXED_EXPENSE: "Fixed Expense",
       ONE_TIME_EXPENSE: "One-Time Expense",
       RENT: "Rent",
+      UNCATEGORIZED: "Uncategorized",
       OTHER: "Other",
     };
 
     const categoryColors: Record<string, string> = {
       "Food & Groceries": "var(--color-food)",
-      "Other Groceries": "var(--color-other)",
+      Essentials: "var(--color-other)",
       Personal: "var(--color-personal)",
       "Eating Out": "var(--color-eating-out)",
       Entertainment: "var(--color-entertainment)",
@@ -158,6 +172,7 @@ export function BankingDashboardComponent() {
       "Fixed Expense": "var(--color-fixed)",
       "One-Time Expense": "var(--color-one-time)",
       Rent: "var(--color-other)",
+      Uncategorized: "var(--color-other)",
       Other: "var(--color-other)",
     };
 
@@ -182,74 +197,93 @@ export function BankingDashboardComponent() {
   }
 
   return (
-    <Tabs defaultValue="overview" className="flex flex-col text-white">
-      <TabsContent value="overview" className="space-y-4">
-        <p className="mx-3 text-2xl">Dashboard</p>
-        <ScrollArea className="w-11/12 whitespace-nowrap rounded-md ">
-          <div className="flex w-max space-x-4">
-            {/*  */}
-            <SavingsGoals balance={balance} />
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+    <div className="">
+      <Tabs defaultValue="overview" className="flex flex-col text-white">
+        <TabsContent value="overview" className="space-y-4">
+          <p className="mx-3 text-2xl">Dashboard</p>
+          <ScrollArea className="w-11/12 whitespace-nowrap rounded-md ">
+            <div className="flex w-max space-x-4">
+              {/*  */}
+              <SavingsGoals
+                balance={balance}
+                setFavoriteGoal={setFavoriteGoal}
+              />
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
 
-        <div className="grid gap-4 lg:grid-cols-20">
-          <Card className="rounded-3xl overflow-hidden relative border-0 text-white bg-[url('/defaultpfp.png')] bg-cover bg-center z-0 col-span-9 h-64">
-            <div className="rounded-lg shadow-lg gradient-opacity-mask-light w-auto"></div>
-            <p className="text-xs text-gray-400 pt-6 pl-6">Welcome back,</p>
-            <h2 className="capitalize pl-6 text-3xl">{username}</h2>
-            <p className="text-xs text-gray-400 pt-2 pl-6">
-              Glad to see you again!
-            </p>
-          </Card>
-          <Card className="relative border-0 text-white bg-transparent z-0 col-span-5">
-            <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
-            <FinancialHealth percentage={financialHealthPercentage} />
-          </Card>
-          <Card className="relative border-0 text-white bg-transparent z-0 col-span-6">
-            <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
-          </Card>
-        </div>
-
-        <div className="grid gap-4 lg:grid-cols-2 ">
-          <Card className="relative border-0 text-white bg-transparent z-0 flex flex-col z-20">
-            <div className="rounded-lg shadow-lg gradient-opacity-mask-flipped w-auto"></div>
-
-            <CardHeader className="flex-none">
-              <CardTitle className="text-lg font-bold text-white">
-                Budget Breakdown
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-1 items-center justify-center">
-              {dailyCost === 0 ? (
-                <p>Loading...</p>
-              ) : (
-                <Budget
-                  budget={budget}
-                  chartData={budgetChartData}
-                  totalSavingsOrLoss={totalSavingsOrLoss}
-                  dailyCost={dailyCost}
+          <div className="grid gap-4 lg:grid-cols-20">
+            <Card className="rounded-3xl overflow-hidden relative border-0 text-white bg-[url('/defaultpfp.png')] bg-cover bg-center z-0 col-span-9 h-64">
+              <div className="rounded-lg shadow-lg gradient-opacity-mask-light w-auto"></div>
+              <p className="text-xs text-gray-400 pt-6 pl-6">Welcome back,</p>
+              <h2 className="capitalize pl-6 text-3xl">{username}</h2>
+              <p className="text-xs text-gray-400 pt-2 pl-6">
+                Glad to see you again!
+              </p>
+            </Card>
+            <Card className="relative border-0 text-white bg-transparent z-0 col-span-5">
+              <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
+              <FinancialHealth percentage={financialHealthPercentage} />
+            </Card>
+            <Card className="relative border-0 text-white bg-transparent z-0 col-span-6">
+              <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
+              {favoriteGoal ? (
+                <FavoriteGoalCard
+                  goal={favoriteGoal.amount}
+                  key={favoriteGoal.id}
+                  label={favoriteGoal.name}
+                  currentAmount={favoriteGoal.currentAmount}
+                  amountAllocatedPerMonth={favoriteGoal.amountAllocatedPerMonth}
+                  monthsUntilDeadline={favoriteGoal.monthsUntilDeadline}
                 />
-              )}{" "}
-            </CardContent>
-          </Card>
-          <Card className="relative border-0 text-white bg-transparent -z-0">
-            <div className="rounded-lg gradient-opacity-mask-flipped"></div>
-            <CardHeader>
-              <CardTitle className="text-lg font-bold text-white">
-                Savings Over Time
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {!chartData ? (
-                <p>Loading...</p>
               ) : (
-                <SavingsChart chartData={chartData} />
+                <p className="text-xs text-gray-400 pt-6 pl-6">
+                  No favorite goal set.
+                </p>
               )}
-            </CardContent>
-          </Card>
-        </div>
-      </TabsContent>
-    </Tabs>
+            </Card>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-2 ">
+            <Card className="relative border-0 text-white bg-transparent z-0 flex flex-col z-20">
+              <div className="rounded-lg shadow-lg gradient-opacity-mask-flipped w-auto"></div>
+
+              <CardHeader className="flex-none">
+                <CardTitle className="text-lg font-bold text-white">
+                  Budget Breakdown
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-1 items-center justify-center">
+                {dailyCost === 0 ? (
+                  <p>Loading...</p>
+                ) : (
+                  <Budget
+                    budget={budget}
+                    chartData={budgetChartData}
+                    totalSavingsOrLoss={totalSavingsOrLoss}
+                    dailyCost={dailyCost}
+                  />
+                )}{" "}
+              </CardContent>
+            </Card>
+            <Card className="relative border-0 text-white bg-transparent -z-0">
+              <div className="rounded-lg gradient-opacity-mask-flipped"></div>
+              <CardHeader>
+                <CardTitle className="text-lg font-bold text-white">
+                  Savings Over Time
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!chartData ? (
+                  <p>Loading...</p>
+                ) : (
+                  <SavingsChart chartData={chartData} />
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }

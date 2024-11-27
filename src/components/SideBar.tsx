@@ -1,8 +1,15 @@
 "use client";
 import { ChevronFirst, ChevronLast } from "lucide-react";
-import { createContext, ReactNode, useContext, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import ProfileImage from "../../public/IMG-20240929-WA0018.jpg";
 import ProfileDropdown from "./ProfileOpenRight";
+import { getProfile } from "@/app/api/actions/auth";
 
 interface SidebarContextProps {
   expanded: boolean;
@@ -11,10 +18,24 @@ interface SidebarContextProps {
 const SidebarContext = createContext<SidebarContextProps>({ expanded: true });
 
 // const SidebarContext = createContext();
-
+interface User {
+  id: string;
+  username: string;
+  email: string;
+  role: string;
+  token: string;
+}
 export default function Sidebar({ children }: { children: React.ReactNode }) {
   const [expanded, setExpanded] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
 
+  useEffect(() => {
+    async function fetchUser() {
+      const userData = await getProfile();
+      setUser(userData);
+    }
+    fetchUser();
+  }, []);
   return (
     <aside className="">
       <nav className="flex flex-col h-full relative border-0 text-white bg-transparent z-0 border-r shadow-sm rounded-r-3xl overflow-hidden">
@@ -44,12 +65,16 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
 
         <div className="border-t flex p-3 mt-auto">
           <div className="">
-            <ProfileDropdown
-              profileImage={ProfileImage}
-              userName="Hamad Alhajeri"
-              userRole="Enginner"
-              userEmail="halhajer@hotmail.com"
-            />
+            {user ? (
+              <ProfileDropdown
+                profileImage={user.username.toUpperCase()}
+                userName={user.username}
+                userRole="Enginner"
+                userEmail={user.email}
+              />
+            ) : (
+              <p>Loading...</p>
+            )}
           </div>
           <div
             className={`flex justify-between items-center overflow-hidden transition-all ${
@@ -57,7 +82,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
             }`}
           >
             <div className="leading-4">
-              <span className="text-xs text-gray-300">johndoe@gmail.com</span>
+              <span className="text-xs text-gray-300">{user?.email}</span>
             </div>
           </div>
         </div>
