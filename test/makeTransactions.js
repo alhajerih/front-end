@@ -2,7 +2,7 @@ const axios = require("axios");
 
 // Bearer token for authentication
 const BEARER_TOKEN =
-  "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIiwicm9sZSI6InVzZXIiLCJpZCI6MSwidXNlck5hbWUiOiJ1c2VyIiwiZXhwIjoxNzMyNzc0MzIxLCJpYXQiOjE3MzI2ODc5MjF9.URdGXiywGppvS1l4zp64u2lGJxzzhoeLkLKGqJYFids"; // Replace with your token
+  "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJIYW1hZCIsInJvbGUiOiJ1c2VyIiwiaWQiOjEsInVzZXJOYW1lIjoiSGFtYWQiLCJleHAiOjE3MzI3ODY0NDcsImlhdCI6MTczMjcwMDA0N30.6QSHtYPYlG4_SZzwVJRfnpaZSdgjEgiT6hQ089E3zow"; // Replace with your token
 
 // API endpoint
 const API_URL = "http://localhost:8081/api/v1/user/transactions";

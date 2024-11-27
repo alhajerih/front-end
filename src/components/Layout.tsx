@@ -9,7 +9,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
-      <Sidebar className="h-screen">
+      <Sidebar>
         <Link href="/">
           <SidebarItem icon={<LayoutDashboard size={20} />} text="Dashboard" />
         </Link>
@@ -23,7 +23,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         <Link href="/settings">
           <SidebarItem icon={<Settings size={20} />} text="Settings" />
         </Link>
-        <Link href="/contact">
+        <Link href="/team">
           <SidebarItem icon={<Phone />} text="Contact Us" />
         </Link>
         <div onClick={logout}>
