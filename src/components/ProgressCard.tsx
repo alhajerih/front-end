@@ -54,7 +54,17 @@ export function ProgressCard({
 
   const handleSave = async () => {
     const amount = parseFloat(saveAmount);
+    const remainingAmount = goal.amount - goal.currentAmount;
+
     if (amount > 0) {
+      if (amount > remainingAmount) {
+        alert(
+          `You can only add up to ${remainingAmount.toFixed(
+            2
+          )} KWD to this goal.`
+        );
+        return; // Prevent further execution if the amount exceeds the limit
+      }
       try {
         await updateSavingAmount(goal.id, amount); // Call backend API to update the savings goal
         onSave(amount); // Update the local UI state
@@ -63,6 +73,8 @@ export function ProgressCard({
       } catch (error) {
         console.error("Failed to save amount:", error);
       }
+    } else {
+      alert("Please enter a valid amount greater than 0.");
     }
   };
 
@@ -135,11 +147,18 @@ export function ProgressCard({
                   </label>
                   <Input
                     id="saveAmount"
-                    type="number"
+                    type="text" // Use text to have complete control over input handling
                     value={saveAmount}
-                    onChange={(e) => setSaveAmount(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Allow only numeric values, optionally including a single decimal point
+                      if (/^\d*\.?\d*$/.test(value)) {
+                        setSaveAmount(value);
+                      }
+                    }}
                     placeholder="Enter amount"
                     className="bg-slate-600 border-slate-600 text-white shadow-lg"
+                    required
                   />
                 </div>
               </div>

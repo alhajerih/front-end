@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider"; // Import Slider
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Plus, Car, Plane, Home, Gem, Hospital, Wallet } from "lucide-react";
 import {
@@ -31,6 +32,7 @@ type SavingsGoal = {
   label: string;
   currentAmount: number;
   icon?: string;
+  amountAllocatedPerMonth?: number;
 };
 
 const iconOptions = [
@@ -42,17 +44,25 @@ const iconOptions = [
   { value: "wallet", icon: Wallet },
 ];
 
-export default function SavingsGoals({ balance }: { balance: number }) {
+export default function SavingsGoals({
+  balance,
+  setFavoriteGoal,
+}: {
+  balance: number;
+}) {
   const [goals, setGoals] = useState<SavingsGoal[]>([]);
-  const [newGoal, setNewGoal] = useState<string>("");
+  const [newGoal, setNewGoal] = useState<number>(100);
   const [newLabel, setNewLabel] = useState<string>("");
   const [newIcon, setNewIcon] = useState<string>("");
+  const [monthsUntilDeadline, setMonthsUntilDeadline] = useState<number>(3); // Default to 1 month
   const [completedGoal, setCompletedGoal] = useState<string | null>(null);
   const [isAddGoalDialogOpen, setIsAddGoalDialogOpen] = useState(false);
   const [favoriteSavingId, setFavoriteSavingId] = useState<number | null>(null);
 
   const totalSaved = goals.reduce((sum, goal) => sum + goal.currentAmount, 0); // Sum of currentAmount
   const remainingBalance = balance - totalSaved; // Subtract totalSaved from balance
+
+  const amountAllocatedPerMonth = newGoal / monthsUntilDeadline || 0;
 
   // Fetch existing savings goals
   useEffect(() => {
@@ -71,13 +81,15 @@ export default function SavingsGoals({ balance }: { balance: number }) {
 
   // Add new goal
   const addGoal = async () => {
-    const goalAmount = parseFloat(newGoal); // Ensure this is a valid number
+    const goalAmount = newGoal; // Ensure this is a valid number
     if (goalAmount > 0 && newLabel) {
       try {
         const payload = {
           amount: goalAmount, // Backend expects "amount" instead of "goal"
           name: newLabel, // Backend expects "name" instead of "label"
           icon: newIcon || "", // Optional icon, default to empty string
+          monthsUntilDeadline,
+          amountAllocatedPerMonth,
         };
 
         console.log("Payload being sent to the backend:", payload);
@@ -85,9 +97,10 @@ export default function SavingsGoals({ balance }: { balance: number }) {
         const newSaving = await addSaving(payload);
 
         setGoals([...goals, newSaving]);
-        setNewGoal("");
+        setNewGoal(100);
         setNewLabel("");
         setNewIcon("");
+        setMonthsUntilDeadline(1); // Reset slider
         setIsAddGoalDialogOpen(false); // Close the modal
       } catch (error) {
         console.error("Failed to add savings goal:", error);
@@ -102,6 +115,7 @@ export default function SavingsGoals({ balance }: { balance: number }) {
     try {
       await deleteSaving(id);
       setGoals(goals.filter((goal) => goal.id !== id));
+      setFavoriteGoal(null);
     } catch (error) {
       console.error("Failed to delete savings goal:", error);
     }
@@ -110,12 +124,30 @@ export default function SavingsGoals({ balance }: { balance: number }) {
   // Save amount to a goal
   const saveAmount = (id: number, amount: number) => {
     setGoals((prevGoals) =>
-      prevGoals.map((goal) =>
-        goal.id === id
-          ? { ...goal, currentAmount: goal.currentAmount + amount }
-          : goal
-      )
+      prevGoals.map((goal) => {
+        if (goal.id === id) {
+          const remainingAmount = goal.goal - goal.currentAmount;
+          if (amount > remainingAmount) {
+            alert(
+              `You can only add up to ${remainingAmount} KWD to this goal.`
+            );
+            return goal; // No changes if the amount exceeds the limit
+          }
+          return { ...goal, currentAmount: goal.currentAmount + amount };
+        }
+        return goal;
+      })
     );
+    let newGoal = goals.find((goal) => goal.id === id);
+    const remainingAmount = newGoal.goal - newGoal.currentAmount;
+    if (amount > remainingAmount) {
+      alert(`You can only add up to ${remainingAmount} KWD to this goal.`);
+    }
+
+    setFavoriteGoal({
+      ...newGoal,
+      currentAmount: newGoal.currentAmount + amount,
+    });
   };
 
   // Mark a goal as favorite
@@ -123,6 +155,10 @@ export default function SavingsGoals({ balance }: { balance: number }) {
     try {
       await setFavoriteSaving(savingId); // Call the backend API
       setFavoriteSavingId(savingId); // Update the favorite saving ID in state
+      // Pass in the entire goal object into setFavoriteGoal
+      console.log(goals.find((goal) => goal.id === savingId) || null);
+      setFavoriteGoal(goals.find((goal) => goal.id === savingId) || null);
+
       console.log(`Saving ID ${savingId} marked as favorite`);
     } catch (error) {
       console.error("Failed to set favorite saving:", error);
@@ -148,9 +184,13 @@ export default function SavingsGoals({ balance }: { balance: number }) {
                 </span>{" "}
                 KWD
               </div>
-              <div className="text-sm text-gray-300 font-medium">
-                Remaining Balance:{" "}
-                <span className="text-white font-bold">
+              <div className="text-xs text-gray-300 font-medium">
+                Unsaved Balance:{" "}
+                <span
+                  className={`font-bold ${
+                    remainingBalance < 0 ? "text-red-500" : "text-white"
+                  }`}
+                >
                   {remainingBalance.toFixed(2)} KWD
                 </span>
               </div>
@@ -192,11 +232,18 @@ export default function SavingsGoals({ balance }: { balance: number }) {
                   </label>
                   <Input
                     id="goal"
-                    type="number"
+                    type="text" // Use text for better control over input validation
                     value={newGoal}
-                    onChange={(e) => setNewGoal(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Allow only numeric values, optionally including a single decimal point
+                      if (/^\d*\.?\d*$/.test(value)) {
+                        setNewGoal(value); // Update state only if input is valid
+                      }
+                    }}
                     placeholder="Enter amount"
                     className="bg-slate-600 border-slate-600 text-white shadow-lg"
+                    required
                   />
                 </div>
                 <div className="grid gap-2">
@@ -209,6 +256,27 @@ export default function SavingsGoals({ balance }: { balance: number }) {
                     onChange={(e) => setNewLabel(e.target.value)}
                     className="bg-slate-600 border-slate-600 text-white shadow-lg"
                   />
+                </div>
+                <div className="grid gap-2">
+                  <Label className="text-zinc-400">Deadline (Months)</Label>
+                  <Slider
+                    value={[monthsUntilDeadline]}
+                    onValueChange={([value]) => setMonthsUntilDeadline(value)}
+                    min={1}
+                    max={12 * 5}
+                    step={1}
+                    className="w-full bg-blue-200 h-2 rounded-full" // Adjust the bar color
+                  />
+
+                  <p className="text-white text-sm">
+                    {monthsUntilDeadline} month(s)
+                  </p>
+                </div>
+                <div className="text-white text-sm font-medium">
+                  Allocation per month:{" "}
+                  <span className="text-blue-500 font-bold">
+                    {amountAllocatedPerMonth.toFixed(2)} KWD
+                  </span>
                 </div>
                 <div className="grid gap-2">
                   <Label className="text-zinc-400">Add icon (optional)</Label>

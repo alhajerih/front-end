@@ -10,6 +10,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import Budget from "./Transactions/Budget";
 import SavingsGoals from "./SavingsGoals";
 import { FinancialHealth } from "./FinancialHealth";
+import { FavoriteGoalCard } from "./FavoriteGoalCard";
 
 export function BankingDashboardComponent() {
   const [balance, setBalance] = useState(0);
@@ -22,6 +23,7 @@ export function BankingDashboardComponent() {
   const [prices, setPrices] = useState(null);
   const [dailyCost, setDailyCost] = useState(0);
   const [financialHealthPercentage, setFinancialHealthPercentage] = useState(0);
+  const [favoriteGoal, setFavoriteGoal] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -202,7 +204,10 @@ export function BankingDashboardComponent() {
           <ScrollArea className="w-11/12 whitespace-nowrap rounded-md ">
             <div className="flex w-max space-x-4">
               {/*  */}
-              <SavingsGoals balance={balance} />
+              <SavingsGoals
+                balance={balance}
+                setFavoriteGoal={setFavoriteGoal}
+              />
             </div>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
@@ -222,6 +227,20 @@ export function BankingDashboardComponent() {
             </Card>
             <Card className="relative border-0 text-white bg-transparent z-0 col-span-6">
               <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
+              {favoriteGoal ? (
+                <FavoriteGoalCard
+                  goal={favoriteGoal.amount}
+                  key={favoriteGoal.id}
+                  label={favoriteGoal.name}
+                  currentAmount={favoriteGoal.currentAmount}
+                  amountAllocatedPerMonth={favoriteGoal.amountAllocatedPerMonth}
+                  monthsUntilDeadline={favoriteGoal.monthsUntilDeadline}
+                />
+              ) : (
+                <p className="text-xs text-gray-400 pt-6 pl-6">
+                  No favorite goal set.
+                </p>
+              )}
             </Card>
           </div>
 
