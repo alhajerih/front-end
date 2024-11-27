@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import { Button } from "@mui/material";
-import { StyledDialog } from "./StyledDialog";
+import { StyledDialog } from "../Transactions/StyledDialog";
 
 interface BudgetProps {
   budget: number;

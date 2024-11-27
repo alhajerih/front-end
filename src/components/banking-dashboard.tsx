@@ -7,10 +7,13 @@ import { useEffect, useState } from "react";
 
 import { getTransactions, Transaction } from "@/app/api/actions/auth";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import Budget from "./Transactions/Budget";
+import Budget from "./BudgetingCard/Budget";
 import SavingsGoals from "./SavingsGoals";
 import { FinancialHealth } from "./FinancialHealth";
 import { FavoriteGoalCard } from "./FavoriteGoalCard";
+import BeneficiaryDialog from "./BudgetingCard/BeneficiaryComponent";
+import BeneficiaryList from "./BudgetingCard/BeneficiaryList";
+import BeneficiaryBreakdownCard from "./BudgetingCard/BeneficiaryBreakdownCard";
 
 export function BankingDashboardComponent() {
   const [balance, setBalance] = useState(0);
@@ -200,9 +203,8 @@ export function BankingDashboardComponent() {
     <div className="">
       <Tabs defaultValue="overview" className="flex flex-col text-white">
         <TabsContent value="overview" className="space-y-4">
-          <p className="mx-3 text-2xl">Dashboard</p>
           <ScrollArea className="w-11/12 whitespace-nowrap rounded-md ">
-            <div className="flex w-max space-x-4">
+            <div className="flex w-max space-x-4 mt-4">
               {/*  */}
               <SavingsGoals
                 balance={balance}
@@ -249,8 +251,10 @@ export function BankingDashboardComponent() {
               <div className="rounded-lg shadow-lg gradient-opacity-mask-flipped w-auto"></div>
 
               <CardHeader className="flex-none">
-                <CardTitle className="text-lg font-bold text-white">
+                <CardTitle className="text-lg font-bold text-white flex">
                   Budget Breakdown
+                  <BeneficiaryBreakdownCard />
+                  <BeneficiaryDialog />
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex flex-1 items-center justify-center">
