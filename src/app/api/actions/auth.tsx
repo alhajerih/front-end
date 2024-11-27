@@ -24,6 +24,7 @@ interface LoginData {
 interface User {
   id: string;
   username: string;
+  email: string;
   role: string;
   token: string;
 }
@@ -39,8 +40,9 @@ interface Saving {
   id: number;
   name: string;
   amount: number;
-  deadline: number;
-  amountAllocatedPerMonth: number;
+  // deadline: number;
+  // amountAllocatedPerMonth: number;
+  icon: string;
 }
 
 export interface Transaction {
@@ -114,13 +116,14 @@ export async function logout(): Promise<void> {
 // Fetch profile
 export async function getProfile(): Promise<User> {
   try {
-    const response = await fetch(`${baseUrl}/api/v1/auth/me`, {
+    const response = await fetch(`${baseUrl}/api/v1/user/me`, {
       method: "GET",
       headers: await getHeaders(),
     });
 
     if (!response.ok) {
       const error = await response.json();
+
       throw new Error(error.message || "Failed to fetch profile");
     }
 
@@ -134,7 +137,7 @@ export async function getProfile(): Promise<User> {
 // Beneficiaries actions
 export async function getBeneficiaries(): Promise<Beneficiary[]> {
   try {
-    const response = await fetch(`${baseUrl}/api/v1/beneficiaries`, {
+    const response = await fetch(`${baseUrl}/api/v1/user/beneficiaries`, {
       method: "GET",
       headers: await getHeaders(),
     });
@@ -155,7 +158,7 @@ export async function addBeneficiary(
   data: Omit<Beneficiary, "id">
 ): Promise<Beneficiary> {
   try {
-    const response = await fetch(`${baseUrl}/api/v1/beneficiaries`, {
+    const response = await fetch(`${baseUrl}/api/v1/user/beneficiaries`, {
       method: "POST",
       headers: await getHeaders(),
       body: JSON.stringify(data),
@@ -177,7 +180,7 @@ export async function addBeneficiary(
 // Savings actions
 export async function getSavings(): Promise<Saving[]> {
   try {
-    const response = await fetch(`${baseUrl}/api/v1/savings`, {
+    const response = await fetch(`${baseUrl}/api/v1/user/savings`, {
       method: "GET",
       headers: await getHeaders(),
     });
@@ -196,21 +199,80 @@ export async function getSavings(): Promise<Saving[]> {
 
 export async function addSaving(data: Omit<Saving, "id">): Promise<Saving> {
   try {
-    const response = await fetch(`${baseUrl}/api/v1/savings`, {
+    const response = await fetch(`${baseUrl}/api/v1/user/savings`, {
       method: "POST",
       headers: await getHeaders(),
       body: JSON.stringify(data),
     });
 
+    console.log(response, data);
+
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || "Failed to add saving");
+      throw new Error(error.message);
     }
 
-    revalidatePath("/savings");
+    // revalidatePath("/savings");
     return await response.json();
   } catch (error) {
     console.error("Error adding saving:", error);
+    throw error;
+  }
+}
+
+export async function updateSavingAmount(
+  id: number,
+  amountToAdd: number
+): Promise<void> {
+  try {
+    const response = await fetch(`${baseUrl}/api/v1/user/savings/${id}`, {
+      method: "PUT",
+      headers: await getHeaders(),
+      body: JSON.stringify({ amountToAdd }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to update saving amount");
+    }
+  } catch (error) {
+    console.error("Error updating saving amount:", error);
+    throw error;
+  }
+}
+
+export async function deleteSaving(id: number): Promise<void> {
+  try {
+    const response = await fetch(`${baseUrl}/api/v1/user/savings/${id}`, {
+      method: "DELETE",
+      headers: await getHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to delete saving");
+    }
+
+    revalidatePath("/savings"); // Revalidate the savings path if needed
+  } catch (error) {
+    console.error("Error deleting saving:", error);
+    throw error;
+  }
+}
+
+export async function setFavoriteSaving(savingId: number): Promise<void> {
+  try {
+    const response = await fetch(`${baseUrl}/api/v1/user/savings/${savingId}`, {
+      method: "POST", // Use POST as per the backend
+      headers: await getHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to set favorite saving");
+    }
+  } catch (error) {
+    console.error("Error setting favorite saving:", error);
     throw error;
   }
 }

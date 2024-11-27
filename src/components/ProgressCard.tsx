@@ -11,9 +11,12 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { updateSavingAmount } from "@/app/api/actions/auth";
 
 type SavingsGoal = {
   id: number;
+  name: string;
+  amount: number;
   goal: number;
   label: string;
   currentAmount: number;
@@ -22,8 +25,10 @@ type SavingsGoal = {
 
 type ProgressCardProps = {
   goal: SavingsGoal;
+  isFavorite: boolean; // Flag to indicate if this is the favorite saving
   onDelete: () => void;
   onSave: (amount: number) => void;
+  onSetFavorite: () => void; // Function to set this saving as the favorite
 };
 
 const iconMap = {
@@ -35,26 +40,43 @@ const iconMap = {
   wallet: Wallet,
 };
 
-export function ProgressCard({ goal, onDelete, onSave }: ProgressCardProps) {
+import { Star } from "lucide-react";
+
+export function ProgressCard({
+  goal,
+  isFavorite,
+  onDelete,
+  onSave,
+  onSetFavorite,
+}: ProgressCardProps) {
   const [saveAmount, setSaveAmount] = useState<string>("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const progress = (goal.currentAmount / goal.goal) * 100;
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const amount = parseFloat(saveAmount);
     if (amount > 0) {
-      onSave(amount);
-      setSaveAmount("");
-      setIsDialogOpen(false);
+      try {
+        await updateSavingAmount(goal.id, amount); // Call backend API to update the savings goal
+        onSave(amount); // Update the local UI state
+        setSaveAmount(""); // Clear input field
+        setIsDialogOpen(false); // Close modal
+      } catch (error) {
+        console.error("Failed to save amount:", error);
+      }
     }
   };
 
+  const progress = (goal.currentAmount / goal.amount) * 100;
   const IconComponent = goal.icon
     ? iconMap[goal.icon as keyof typeof iconMap]
     : null;
 
   return (
-    <Card className="p-4 relative border-0 text-white bg-transparent z-0 w-auto h-auto pr-10">
+    <Card
+      className={`p-4 relative border-0 text-white bg-transparent z-0 w-auto h-auto pr-10 ${
+        isFavorite ? "border-yellow-500" : ""
+      }`}
+    >
       <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
 
       <Button
@@ -67,28 +89,30 @@ export function ProgressCard({ goal, onDelete, onSave }: ProgressCardProps) {
       </Button>
 
       <div className="space-y-4">
-        <div className="flex items-center space-x-2">
-          {IconComponent && <IconComponent className="h-6 w-6 text-blue-500" />}
+        <div className="flex items-start space-x-2">
+          {IconComponent && <IconComponent className="h-6 w-9 text-blue-500" />}
           <div>
-            {/* <h3 className="text-sm font-medium text-zinc-400">
-              Your goal towards:
-              <p className="text-white font-bold">{goal.label}</p>
-            </h3> */}
+            <p className="text-xs font-semibold text-zinc-100">{goal.name} </p>
             <p className="text-xs font-semibold text-zinc-100">
-              {goal.label} {goal.currentAmount.toFixed(2)} KWD /{" "}
-              {goal.goal.toFixed(2)} KWD
+              {goal.currentAmount !== undefined && goal.currentAmount !== null
+                ? goal.currentAmount.toFixed(0)
+                : "0.00"}{" "}
+              KWD /{" "}
+              {goal.amount !== undefined && goal.amount !== null
+                ? goal.amount.toFixed(0)
+                : "0.00"}{" "}
+              KWD
             </p>
           </div>
         </div>
-
+        <div className="relative flex-grow h-2 bg-zinc-800 rounded-full">
+          <div
+            className="absolute top-0 left-0 h-full bg-blue-500 rounded-full"
+            style={{ width: `${progress}%` }}
+          ></div>
+        </div>
         <div className="flex items-center space-x-2">
           {/* Custom Progress Bar */}
-          <div className="relative flex-grow h-2 bg-zinc-800 rounded-full">
-            <div
-              className="absolute top-0 left-0 h-full bg-blue-500 rounded-full"
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -129,6 +153,20 @@ export function ProgressCard({ goal, onDelete, onSave }: ProgressCardProps) {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          <Button
+            variant="outline"
+            size="sm"
+            className={`border-zinc-800 bg-zinc-900 hover:bg-yellow-500 text-white ${
+              isFavorite ? "bg-yellow-500" : ""
+            }`}
+            onClick={onSetFavorite} // Trigger favorite action
+          >
+            <Star
+              className={`h-4 w-4 ${
+                isFavorite ? "text-yellow-400" : "text-white"
+              }`}
+            />
+          </Button>
         </div>
       </div>
     </Card>

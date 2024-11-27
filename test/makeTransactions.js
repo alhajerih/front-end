@@ -2,7 +2,7 @@ const axios = require("axios");
 
 // Bearer token for authentication
 const BEARER_TOKEN =
-  "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJ1c2VyIiwiaWQiOjEsInVzZXJOYW1lIjoiYWRtaW4iLCJleHAiOjE3MzI2OTE3NTgsImlhdCI6MTczMjYwNTM1OH0.ijeiqdxSCxQJtJugmveCVRr1UVwVUmFXIE5w551tNxI"; // Replace with your token
+  "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIiwicm9sZSI6InVzZXIiLCJpZCI6MSwidXNlck5hbWUiOiJ1c2VyIiwiZXhwIjoxNzMyNzc0MzIxLCJpYXQiOjE3MzI2ODc5MjF9.URdGXiywGppvS1l4zp64u2lGJxzzhoeLkLKGqJYFids"; // Replace with your token
 
 // API endpoint
 const API_URL = "http://localhost:8081/api/v1/user/transactions";
@@ -24,8 +24,8 @@ const TRANSACTION_CATEGORIES = [
 ];
 
 // Possible transaction types
-// const TRANSACTION_TYPES = ["DEPOSIT", "WITHDRAWAL"];
-const TRANSACTION_TYPES = ["DEPOSIT"];
+const TRANSACTION_TYPES = ["DEPOSIT", "WITHDRAWAL"];
+// const TRANSACTION_TYPES = ["DEPOSIT"];
 
 // Generate a random transaction body
 const generateRandomTransaction = () => {

@@ -56,7 +56,7 @@ export function StyledDialog({
       // setRecommendations(["Loading personalized recommendations..."]);
       const response = await fetch("http://localhost:8081/api/v1/user/chat", {
         method: "POST",
-        headers: await getHeaders(),
+        // headers: await getHeaders(),
         body: JSON.stringify({
           prompt: `You are an AI chatbot for a financial budgeting website. Your task is to provide personalized financial recommendations based on the user's budget and spending data. The following data is provided:
           - Total Budget: $${budget}
@@ -64,7 +64,7 @@ export function StyledDialog({
           - Total Savings or Loss: $${totalSavingsOrLoss}
           - Average daily cost of food per person within the area: $${dailyCost}.
           
-          Analyze this data and suggest actionable recommendations to help the user save money and manage their budget effectively. Ensure the recommendations are practical, personalized, and easy to implement. Keep it under 200 words. Separate each tip with 2 breakpoints, as this is using the marked package on React`,
+          Analyze this data and suggest actionable recommendations to help the user save money and manage their budget effectively. Ensure the recommendations are practical, personalized, and easy to implement.`,
         }),
       });
 
@@ -151,11 +151,11 @@ export function StyledDialog({
 
   useEffect(() => {
     if (!isDialogOpen) {
-      setDisplayedText([]);
-      setRecommendations([]);
-      setCurrentRecommendation(0);
-      setIsTyping(false);
-      setCurrentTypedText("");
+      // setDisplayedText([]);
+      // setRecommendations([]);
+      // setCurrentRecommendation(0);
+      // setIsTyping(false);
+      // setCurrentTypedText("");
     }
   }, [isDialogOpen]);
 
@@ -200,8 +200,12 @@ export function StyledDialog({
           </DialogHeader>
 
           <ul className="list-disc pl-6 space-y-2 text-gray-200 [&_strong]:font-bold [&_strong]:text-lg [&_strong]:leading-10">
-            {recommendations.length === 0 && !isTyping && (
-              <li className="min-h-[1.5em] text-gray-400">Loading...</li>
+            {/* {recommendations.length === 0 && !isTyping && ( */}
+            {true && (
+              <li className="min-h-[1.5em] text-gray-400 flex items-center gap-2 justify-center">
+                <span className="animate-bounce">🔄</span>
+                Loading...
+              </li>
             )}
             {displayedText.map((text, index) => (
               <div

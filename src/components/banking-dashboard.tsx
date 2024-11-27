@@ -195,74 +195,76 @@ export function BankingDashboardComponent() {
   }
 
   return (
-    <Tabs defaultValue="overview" className="flex flex-col text-white">
-      <TabsContent value="overview" className="space-y-4">
-        <p className="mx-3 text-2xl">Dashboard</p>
-        <ScrollArea className="w-11/12 whitespace-nowrap rounded-md ">
-          <div className="flex w-max space-x-4">
-            {/*  */}
-            <SavingsGoals balance={balance} />
+    <div className="">
+      <Tabs defaultValue="overview" className="flex flex-col text-white">
+        <TabsContent value="overview" className="space-y-4">
+          <p className="mx-3 text-2xl">Dashboard</p>
+          <ScrollArea className="w-11/12 whitespace-nowrap rounded-md ">
+            <div className="flex w-max space-x-4">
+              {/*  */}
+              <SavingsGoals balance={balance} />
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+
+          <div className="grid gap-4 lg:grid-cols-20">
+            <Card className="rounded-3xl overflow-hidden relative border-0 text-white bg-[url('/defaultpfp.png')] bg-cover bg-center z-0 col-span-9 h-64">
+              <div className="rounded-lg shadow-lg gradient-opacity-mask-light w-auto"></div>
+              <p className="text-xs text-gray-400 pt-6 pl-6">Welcome back,</p>
+              <h2 className="capitalize pl-6 text-3xl">{username}</h2>
+              <p className="text-xs text-gray-400 pt-2 pl-6">
+                Glad to see you again!
+              </p>
+            </Card>
+            <Card className="relative border-0 text-white bg-transparent z-0 col-span-5">
+              <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
+              <FinancialHealth percentage={financialHealthPercentage} />
+            </Card>
+            <Card className="relative border-0 text-white bg-transparent z-0 col-span-6">
+              <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
+            </Card>
           </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
 
-        <div className="grid gap-4 lg:grid-cols-20">
-          <Card className="rounded-3xl overflow-hidden relative border-0 text-white bg-[url('/defaultpfp.png')] bg-cover bg-center z-0 col-span-9 h-64">
-            <div className="rounded-lg shadow-lg gradient-opacity-mask-light w-auto"></div>
-            <p className="text-xs text-gray-400 pt-6 pl-6">Welcome back,</p>
-            <h2 className="capitalize pl-6 text-3xl">{username}</h2>
-            <p className="text-xs text-gray-400 pt-2 pl-6">
-              Glad to see you again!
-            </p>
-          </Card>
-          <Card className="relative border-0 text-white bg-transparent z-0 col-span-5">
-            <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
-            <FinancialHealth percentage={financialHealthPercentage} />
-          </Card>
-          <Card className="relative border-0 text-white bg-transparent z-0 col-span-6">
-            <div className="rounded-lg shadow-lg gradient-opacity-mask w-auto"></div>
-          </Card>
-        </div>
+          <div className="grid gap-4 lg:grid-cols-2 ">
+            <Card className="relative border-0 text-white bg-transparent z-0 flex flex-col z-20">
+              <div className="rounded-lg shadow-lg gradient-opacity-mask-flipped w-auto"></div>
 
-        <div className="grid gap-4 lg:grid-cols-2 ">
-          <Card className="relative border-0 text-white bg-transparent z-0 flex flex-col z-20">
-            <div className="rounded-lg shadow-lg gradient-opacity-mask-flipped w-auto"></div>
-
-            <CardHeader className="flex-none">
-              <CardTitle className="text-lg font-bold text-white">
-                Budget Breakdown
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-1 items-center justify-center">
-              {dailyCost === 0 ? (
-                <p>Loading...</p>
-              ) : (
-                <Budget
-                  budget={budget}
-                  chartData={budgetChartData}
-                  totalSavingsOrLoss={totalSavingsOrLoss}
-                  dailyCost={dailyCost}
-                />
-              )}{" "}
-            </CardContent>
-          </Card>
-          <Card className="relative border-0 text-white bg-transparent -z-0">
-            <div className="rounded-lg gradient-opacity-mask-flipped"></div>
-            <CardHeader>
-              <CardTitle className="text-lg font-bold text-white">
-                Savings Over Time
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {!chartData ? (
-                <p>Loading...</p>
-              ) : (
-                <SavingsChart chartData={chartData} />
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </TabsContent>
-    </Tabs>
+              <CardHeader className="flex-none">
+                <CardTitle className="text-lg font-bold text-white">
+                  Budget Breakdown
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-1 items-center justify-center">
+                {dailyCost === 0 ? (
+                  <p>Loading...</p>
+                ) : (
+                  <Budget
+                    budget={budget}
+                    chartData={budgetChartData}
+                    totalSavingsOrLoss={totalSavingsOrLoss}
+                    dailyCost={dailyCost}
+                  />
+                )}{" "}
+              </CardContent>
+            </Card>
+            <Card className="relative border-0 text-white bg-transparent -z-0">
+              <div className="rounded-lg gradient-opacity-mask-flipped"></div>
+              <CardHeader>
+                <CardTitle className="text-lg font-bold text-white">
+                  Savings Over Time
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!chartData ? (
+                  <p>Loading...</p>
+                ) : (
+                  <SavingsChart chartData={chartData} />
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }

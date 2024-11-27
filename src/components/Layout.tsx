@@ -20,15 +20,15 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         <Link href="/profile">
           <SidebarItem icon={<User />} text="Profile" />
         </Link>
-        <div onClick={logout}>
-          <SidebarItem icon={<LogOut />} text="Logout" />
-        </div>
         <Link href="/settings">
           <SidebarItem icon={<Settings size={20} />} text="Settings" />
         </Link>
         <Link href="/contact">
           <SidebarItem icon={<Phone />} text="Contact Us" />
         </Link>
+        <div onClick={logout}>
+          <SidebarItem icon={<LogOut />} text="Logout" />
+        </div>
       </Sidebar>
 
       {/* Main Content */}

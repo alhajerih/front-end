@@ -121,11 +121,11 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
                 color="text.primary"
                 fontWeight={600}
               >
-                {userName}
+                Name: {userName}
               </Typography>
-              <Typography variant="caption" color="textSecondary">
+              {/* <Typography variant="caption" color="textSecondary">
                 {userRole}
-              </Typography>
+              </Typography> */}
               <Typography
                 variant="subtitle2"
                 color="textSecondary"
@@ -154,7 +154,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
                       borderRadius: 1.5,
                     }}
                   >
-                    <Avatar
+                    {/* <Avatar
                       variant="rounded"
                       sx={{
                         minWidth: 24,
@@ -166,10 +166,10 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
                         icon={profileItem.icon}
                         color={profileItem.color}
                       />
-                    </Avatar>
+                    </Avatar> */}
                   </Stack>
                   <div>
-                    <Typography
+                    {/* <Typography
                       variant="subtitle2"
                       fontWeight={600}
                       noWrap
@@ -178,8 +178,8 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
                       }}
                     >
                       {profileItem.title}
-                    </Typography>
-                    <Typography
+                    </Typography> */}
+                    {/* <Typography
                       variant="subtitle2"
                       sx={{
                         width: 150,
@@ -187,7 +187,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
                       noWrap
                     >
                       {profileItem.subtitle}
-                    </Typography>
+                    </Typography> */}
                   </div>
                 </Stack>
               </Link>

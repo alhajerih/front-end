@@ -107,7 +107,7 @@ const AuthForm = ({ type }: { type: "signin" | "signup" }) => {
               className="text-[26px] leading-[32px]
  font-ibm-plex-serif font-bold text-white"
             >
-              Liwan
+              Tadbeer Financial
             </h1>
           </Link>
 
